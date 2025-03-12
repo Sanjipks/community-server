@@ -15,7 +15,6 @@ class communityPost(BaseModel):
     date: str
 
 
-
 class categoryPost(BaseModel):
     id: int
     title: str
@@ -25,5 +24,10 @@ class categoryPost(BaseModel):
     author: str
     timestamp: str
 
+class categoryPostedJokes(BaseModel):
+    id: int
+    joke: str
+    author: str
+    timestamp: str
 
 
