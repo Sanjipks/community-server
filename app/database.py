@@ -12,3 +12,6 @@ if MONGO_URI is None:
 
 client = AsyncIOMotorClient(MONGO_URI)
 db = client[DATABASE_NAME]
+
+async def get_database():
+    return db

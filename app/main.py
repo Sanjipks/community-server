@@ -1,14 +1,34 @@
 from fastapi import FastAPI
-from motor.motor_asyncio import AsyncIOMotorClient
+from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
+from app.database import get_database
+from dotenv import load_dotenv
+load_dotenv()
+import os
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global db
+    db = await get_database()
+    yield
+   
 
-# MongoDB Connection
-MONGO_URI = "mongodb://localhost:27017"
-DATABASE_NAME = "testdb"
+app = FastAPI(lifespan=lifespan)
 
-client = AsyncIOMotorClient(MONGO_URI)
-db = client[DATABASE_NAME]
+ORIGINS = os.getenv("ORIGINS")
+
+# Configure CORS
+origins = [
+   ORIGINS   
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 async def root():
@@ -16,7 +36,10 @@ async def root():
 
 @app.get("/users")
 async def get_users():
-    users = await db["users"].find().to_list(length=100)
+    users = await db["user"].find().to_list(length=100)
     return users
 
-
+@app.get("/posted-categories")
+async def get_users():
+    users = await db["postedCategory"].find().to_list(length=100)
+    return users
