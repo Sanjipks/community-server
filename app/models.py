@@ -16,11 +16,11 @@ class communityPost(BaseModel):
 
 
 class postedCategory(BaseModel):
-    id: int
+ 
     title: str
     category: str
     content: str
-    descritpion: str
+    description: str
     author: str
     timestamp: str
 
