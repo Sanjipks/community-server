@@ -54,7 +54,7 @@ async def posted_categories():
     return postedCategories
 
 
-@app.post("/posted-categories")
+@app.post("/post-category")
 async def post_category(category: postedCategory):
     category_dict = category.model_dump()
     result = await db["postedCategory"].insert_one(category_dict)
