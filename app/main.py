@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from app.database import get_database
-from app.models import postedCategory
+from app.models import postCategory
 from dotenv import load_dotenv
 load_dotenv()
 import os
@@ -55,7 +55,7 @@ async def posted_categories():
 
 
 @app.post("/post-category")
-async def post_category(category: postedCategory):
+async def post_category(category: postCategory):
     category_dict = category.model_dump()
     result = await db["postedCategory"].insert_one(category_dict)
     if result.inserted_id:
