@@ -5,6 +5,7 @@ class User(BaseModel):
     name: str
     email: str
     age: Optional[int] = None
+    
 
 
 class communityPost(BaseModel):
