@@ -40,18 +40,14 @@ async def get_users():
     users = await db["user"].find().to_list(length=100)
     return users
 
+
 @app.get("/posted-categories")
 async def posted_categories():
     postedCategories = await db["postedCategory"].find().to_list(length=100)
+    for category in postedCategories:
+        category["id"] = str(category["_id"])
+        del category["_id"]
     return postedCategories
-
-# @app.get("/posted-categories")
-# async def posted_categories():
-#     postedCategories = await db["postedCategory"].find().to_list(length=100)
-#     for category in postedCategories:
-#         category["id"] = str(category["_id"])
-#         del category["_id"]
-#     return postedCategories
 
 
 @app.post("/post-category")
