@@ -18,9 +18,9 @@ class communityPost(BaseModel):
 
 
 class postedCategory(BaseModel):
+    id: str
     title: str
     category: str
-    content: str
     description: str
     author: str
     timestamp: str

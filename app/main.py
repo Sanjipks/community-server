@@ -1,8 +1,9 @@
+from datetime import datetime
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from app.database import get_database
-from app.models import postCategory
+from app.models import postedCategory, postCategory
 from dotenv import load_dotenv
 load_dotenv()
 import os
@@ -41,13 +42,28 @@ async def get_users():
     return users
 
 
-@app.get("/posted-categories")
+# @app.get("/posted-categories")
+# async def posted_categories():
+#     postedCategories = await db["postedCategory"].find().to_list(length=100)
+#     for category in postedCategories:
+#         category["id"] = str(category["_id"])
+#         del category["_id"]
+#     return postedCategories
+
+
+@app.get("/posted-categories", response_model=list[postedCategory])
 async def posted_categories():
     postedCategories = await db["postedCategory"].find().to_list(length=100)
     for category in postedCategories:
         category["id"] = str(category["_id"])
         del category["_id"]
+        # Handle timestamp conversion
+        if isinstance(category["timestamp"], int):  # If timestamp is an integer
+            category["timestamp"] = datetime.fromtimestamp(category["timestamp"] / 1000).isoformat()
+        elif isinstance(category["timestamp"], datetime):  # If timestamp is a datetime object
+            category["timestamp"] = category["timestamp"].isoformat()
     return postedCategories
+
 
 
 @app.post("/post-category")
