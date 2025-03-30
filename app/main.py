@@ -3,7 +3,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from app.database import get_database
-from app.models import postedCategory, postCategory
+from app.models import postCommunityPost, postedCategory, postCategory
 from dotenv import load_dotenv
 load_dotenv()
 import os
@@ -45,6 +45,15 @@ async def get_users():
 async def get_community_posts():
     posts = await db["communityPost"].find().to_list(length=100)
     return posts
+
+@app.post("/post-community-post")
+async def post_community_post(post: postCommunityPost):
+    post_dict = post.model_dump()
+    result = await db["communityPost"].insert_one(post_dict)
+    if result.inserted_id:
+        return {"message": "Post Created Successfully"}
+    else:
+        raise HTTPException(status_code=500, detail="Failed to create post")
 
 @app.get("/posted-categories", response_model=list[postedCategory])
 async def posted_categories():
