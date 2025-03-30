@@ -9,21 +9,22 @@ class user(BaseModel):
     
 
 
-class communityPost(BaseModel):
-    id: int
+class postCommunityPost(BaseModel):
     title: str
     content: str
     author: str
     date: str
 
+class communityPosts(postCommunityPost):
+    id: int
+   
 
-class postedCategory(BaseModel):
-    id: str
+class postCommunityPost(BaseModel):
     title: str
-    category: str
-    description: str
+    content: str
     author: str
-    timestamp: str
+    date: str
+
 
 
 class postCategory(BaseModel):
@@ -32,6 +33,11 @@ class postCategory(BaseModel):
     description: str
     author: str
     timestamp: str
+
+
+class postedCategory(postCategory):
+    id: str
+    
 
 class postedJokes(BaseModel):
     id: int
