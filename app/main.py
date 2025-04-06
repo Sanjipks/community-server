@@ -47,9 +47,6 @@ async def get_community_posts():
     for post in posts:
         post["id"] = str(post["_id"])
         del post["_id"]
-        # Handle timestamp conversion
-        # if isinstance(post["timestamp"], int):  # If timestamp is an integer
-        #     post["timestamp"] = datetime.fromtimestamp(post["timestamp"] / 1000).isoformat()
     return posts
 
 @app.post("/post-community-post")
