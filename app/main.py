@@ -81,3 +81,11 @@ async def post_category(category: postCategory):
         return {"message": "Category Posted Successfully"}
     else:
         raise HTTPException(status_code=500, detail="Failed to post category")
+
+@app.delete("/delete-posted-category/{category_id}")
+async def delete_posted_category(category_id: str):
+    result = await db["postedCategory"].delete_one({"_id": category_id})
+    if result.deleted_count == 1:
+        return {"message": "Category deleted successfully"}
+    else:
+        raise HTTPException(status_code=404, detail="Category not found")
