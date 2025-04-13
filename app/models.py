@@ -37,6 +37,9 @@ class postCategory(BaseModel):
 
 class postedCategory(postCategory):
     id: str
+
+class deleteCategory(postCategory):
+    id: str
     
 
 class postedJokes(BaseModel):

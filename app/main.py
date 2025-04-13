@@ -3,8 +3,9 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from app.database import get_database
-from app.models import postCommunityPost, postedCategory, postCategory
+from app.models import postCommunityPost, postedCategory, postCategory, deleteCategory
 from dotenv import load_dotenv
+from bson import ObjectId
 load_dotenv()
 import os
 
@@ -82,10 +83,25 @@ async def post_category(category: postCategory):
     else:
         raise HTTPException(status_code=500, detail="Failed to post category")
 
-@app.delete("/delete-posted-category/{category_id}")
-async def delete_posted_category(category_id: str):
-    result = await db["postedCategory"].delete_one({"_id": category_id})
+
+
+@app.delete("/delete-posted-category")
+async def delete_posted_category(request: deleteCategory):
+    try:
+        print('Received ID:', request.id)
+        # Convert the string id to ObjectId
+        object_id = ObjectId(request.id)
+        print('ObjectId:', object_id)
+    except Exception as e:
+        print("Error occurred:", str(e))
+        raise HTTPException(status_code=400, detail="Invalid category ID format")
+
+    result = await db["postedCategory"].delete_one({"_id": object_id})
     if result.deleted_count == 1:
         return {"message": "Category deleted successfully"}
     else:
         raise HTTPException(status_code=404, detail="Category not found")
+     
+
+
+
