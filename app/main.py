@@ -103,5 +103,12 @@ async def delete_posted_category(request: deleteCategory):
         raise HTTPException(status_code=404, detail="Category not found")
      
 
-
+@app.post("/add-joke")
+async def post_category(category: postCategory):
+    category_dict = category.model_dump()
+    result = await db["postJoke"].insert_one(category_dict)
+    if result.inserted_id:
+        return {"message": "joke posted Successfully"}
+    else:
+        raise HTTPException(status_code=500, detail="Failed to post jokes")
 
