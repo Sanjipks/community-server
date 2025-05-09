@@ -3,7 +3,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from app.database import get_database
-from app.models import postCommunityPost, postedCategory, postCategory, deleteCategory
+from app.models import postCommunityPost, postedCategory, postCategory, deleteCategory, postJoke
 from dotenv import load_dotenv
 from bson import ObjectId
 load_dotenv()
@@ -104,11 +104,24 @@ async def delete_posted_category(request: deleteCategory):
      
 
 @app.post("/add-joke")
-async def post_category(category: postCategory):
-    category_dict = category.model_dump()
+async def post_joke(joke: postJoke):
+    category_dict = joke.model_dump()
     result = await db["postJoke"].insert_one(category_dict)
     if result.inserted_id:
         return {"message": "joke posted Successfully"}
     else:
         raise HTTPException(status_code=500, detail="Failed to post jokes")
+
+@app.get("/posted-jokes")
+async def posted_jokes():
+    postedJokes = await db["postJoke"].find().to_list(length=100)
+    for joke in postedJokes:
+        joke["id"] = str(joke["_id"])
+        del joke["_id"]
+        # Handle timestamp conversion
+        if isinstance(joke["timestamp"], int):
+            joke["timestamp"] = datetime.fromtimestamp(joke["timestamp"] / 1000).isoformat()
+        elif isinstance(joke["timestamp"], datetime):
+            joke["timestamp"] = joke["timestamp"].isoformat()
+    return postedJokes
 
