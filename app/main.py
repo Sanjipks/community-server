@@ -125,3 +125,19 @@ async def posted_jokes():
             joke["timestamp"] = joke["timestamp"].isoformat()
     return postedJokes
 
+@app.delete("/delete-joke")
+async def delete_joke(request: postJoke):
+    try:
+        print('Received ID:', request.id)
+        # Convert the string id to ObjectId
+        object_id = ObjectId(request.id)
+        print('ObjectId:', object_id)
+    except Exception as e:
+        print("Error occurred:", str(e))
+        raise HTTPException(status_code=400, detail="Invalid joke ID format")
+
+    result = await db["postJoke"].delete_one({"_id": object_id})
+    if result.deleted_count == 1:
+        return {"message": "joke deleted successfully"}
+    else:
+        raise HTTPException(status_code=404, detail="joke not found")
