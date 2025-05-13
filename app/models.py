@@ -44,12 +44,13 @@ class deleteCategory(postCategory):
 
 class postedJokes(BaseModel):
     id: str
-    joke: str
+    title: str
+    content: str
     author: str
-    timestamp: str
+    date: str
 
 class postJoke(BaseModel):  
-    id: str
-    joke: str  
+    title: str
+    content: str  
     author: str
-    timestamp: str
+    date: str

@@ -9,6 +9,8 @@ from bson import ObjectId
 load_dotenv()
 import os
 
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global db
