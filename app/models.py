@@ -47,10 +47,10 @@ class postedJokes(BaseModel):
     title: str
     content: str
     author: str
-    date: str
+    timestamp: str
 
 class postJoke(BaseModel):  
     title: str
     content: str  
     author: str
-    date: str
+    timestamp: str
