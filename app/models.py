@@ -54,3 +54,12 @@ class postJoke(BaseModel):
     content: str  
     author: str
     timestamp: str
+
+class chatMessages(BaseModel):
+    sender: str
+    receiver: str
+    message: str
+    timestamp: str
+
+
+
