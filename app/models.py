@@ -7,7 +7,9 @@ class user(BaseModel):
     age: Optional[int] = None
     role: Literal["admin", "user", 'guest'] 
     
-
+class addUser(user):
+    password: str
+    confirm_password: str
 
 class postCommunityPost(BaseModel):
     title: str
