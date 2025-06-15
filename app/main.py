@@ -144,6 +144,10 @@ async def delete_joke(request: postJoke):
 @app.get("/users")
 async def get_users():
     users = await db["user"].find().to_list(length=100)
+    for user in users:
+        user["id"] = str(user["_id"])
+        del user["_id"]
+   
     return users
 
 @app.post("/chatlist/adduser") 
