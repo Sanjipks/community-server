@@ -27,7 +27,12 @@ class postCommunityPost(BaseModel):
     author: str
     date: str
 
-
+class CommunityNews(BaseModel):
+    id: str
+    title: str
+    descreption: str
+    image: str
+    link: str
 
 class postCategory(BaseModel):
     title: str
