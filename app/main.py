@@ -4,6 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from app.database import get_database
 from app.models import postCommunityPost, postedCategory, postCategory, deleteCategory, postJoke, user
+from app.routes.community_posts import router as community_posts_router
+
 from dotenv import load_dotenv
 from bson import ObjectId
 load_dotenv()
@@ -27,6 +29,9 @@ origins = [
    ORIGINS   
 ]
 
+app.include_router(community_posts_router, prefix="/community-posts", tags=["Community Posts"])
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -39,22 +44,7 @@ app.add_middleware(
 async def root():
     return {"message": "FastAPI with MongoDB"}
 
-@app.get("/community-posts")
-async def get_community_posts():
-    posts = await db["communityPost"].find().to_list(length=100)
-    for post in posts:
-        post["id"] = str(post["_id"])
-        del post["_id"]
-    return posts
 
-@app.post("/post-community-post")
-async def post_community_post(post: postCommunityPost):
-    post_dict = post.model_dump()
-    result = await db["communityPost"].insert_one(post_dict)
-    if result.inserted_id:
-        return {"message": "Post Created Successfully"}
-    else:
-        raise HTTPException(status_code=500, detail="Failed to create post")
 
 @app.get("/posted-categories", response_model=list[postedCategory])
 async def posted_categories():
