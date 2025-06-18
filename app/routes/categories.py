@@ -1,17 +1,23 @@
+from datetime import datetime
 from fastapi import APIRouter, HTTPException
 from bson import ObjectId
 from app.database import get_database
-from app.models import postCategory, deleteCategory
+from app.models import postCategory, deleteCategory, postedCategory
 
 router = APIRouter()
 
-@router.get("/posted-categories")
+@router.get("/posted-categories", response_model=list[postedCategory])
 async def posted_categories():
     db = await get_database()
     postedCategories = await db["postedCategory"].find().to_list(length=100)
     for category in postedCategories:
         category["id"] = str(category["_id"])
         del category["_id"]
+        # Handle timestamp conversion
+        if isinstance(category["timestamp"], int):  # If timestamp is an integer
+            category["timestamp"] = datetime.fromtimestamp(category["timestamp"] / 1000).isoformat()
+        elif isinstance(category["timestamp"], datetime):  # If timestamp is a datetime object
+            category["timestamp"] = category["timestamp"].isoformat()
     return postedCategories
 
 @router.post("/add-categoryPost")
