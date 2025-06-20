@@ -11,6 +11,7 @@ async def posted_categories():
     try:
         db = await get_database()
         postedCategories = await db["postedCategory"].find().to_list(length=100)
+      
         for category in postedCategories:
             category["id"] = str(category["_id"])
             del category["_id"]

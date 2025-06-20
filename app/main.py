@@ -30,7 +30,8 @@ origins = [
    ORIGINS   
 ]
 
-app.include_router(community_posts_router, prefix="/community-posts", tags=["Community Posts"])
+print("Routers linked successfully!")
+app.include_router(community_posts_router, prefix="/community", tags=["Community Posts"])
 app.include_router(categories_router, prefix="/categories", tags=["Categories"])
 
 app.add_middleware(
