@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from typing import Literal, Optional
 
 class user(BaseModel):
@@ -6,6 +6,12 @@ class user(BaseModel):
     email: str
     age: Optional[int] = None
     role: Literal["admin", "user", 'guest'] 
+
+class createUser(BaseModel):
+    name: str
+    email: EmailStr
+    password: str
+    age: int
     
 class addUser(user):
     password: str
