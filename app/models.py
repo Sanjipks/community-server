@@ -11,11 +11,8 @@ class createUser(BaseModel):
     name: str
     email: EmailStr
     password: str
-    age: int
-    
-class addUser(user):
-    password: str
     confirm_password: str
+    date_created: str
 
 class postCommunityPost(BaseModel):
     title: str
