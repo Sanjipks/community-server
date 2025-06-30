@@ -8,10 +8,10 @@ class user(BaseModel):
     role: Literal["admin", "user", 'guest'] 
 
 class createUser(BaseModel):
-    name: str
+    
     email: EmailStr
     password: str
-    confirm_password: str
+    confirmPassword: str
     date_created: str
 
 class postCommunityPost(BaseModel):
