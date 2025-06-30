@@ -7,9 +7,10 @@ router = APIRouter()
 
 @router.post("/create-user")
 async def create_user(user: createUser):
+    print("Received user data:", user)
     try:
        
-        if user.password != user.confirm_password:
+        if user.password != user.confirmPassword:
             raise HTTPException(status_code=400, detail="Passwords do not match")
         
         db = await get_database()
