@@ -1,5 +1,6 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, validator
 from typing import Literal, Optional
+from bcrypt import hashpw, gensalt
 
 class user(BaseModel):
     name: str
@@ -7,13 +8,26 @@ class user(BaseModel):
     age: Optional[int] = None
     role: Literal["admin", "user", 'guest'] 
 
-class createUser(BaseModel):
-    
+class createUser(BaseModel):  
     email: EmailStr
     password: str
     confirmPassword: str
     date_created: str
 
+    @validator("password", pre=True)
+    def hash_password(cls, password: str, values):
+        # Ensure passwords match before hashing
+        confirm_password = values.get("confirmPassword")
+        if confirm_password and password != confirm_password:
+            raise ValueError("Passwords do not match")
+        # Hash the password using bcrypt
+        hashed_password = hashpw(password.encode("utf-8"), gensalt())
+        return hashed_password.decode("utf-8")
+    
+    class Config:
+        # Exclude confirmPassword from being serialized (e.g., in responses)
+        fields = {"confirmPassword": {"exclude": True}}
+    
 class postCommunityPost(BaseModel):
     title: str
     content: str
