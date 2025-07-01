@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, validator
+from pydantic import BaseModel, EmailStr, root_validator
 from typing import Literal, Optional
 from bcrypt import hashpw, gensalt
 
@@ -14,19 +14,31 @@ class createUser(BaseModel):
     confirmPassword: str
     date_created: str
 
-    @validator("password", pre=True)
-    def hash_password(cls, password: str, values):
-        # Ensure passwords match before hashing
+    @root_validator(pre=True)
+    def validate_passwords(cls, values):
+        password = values.get("password")
         confirm_password = values.get("confirmPassword")
-        if confirm_password and password != confirm_password:
+
+        # Ensure both password and confirmPassword are provided
+        if not password or not confirm_password:
+            raise ValueError("Both password and confirmPassword are required")
+
+        # Ensure passwords match
+        if password != confirm_password:
             raise ValueError("Passwords do not match")
+
         # Hash the password using bcrypt
         hashed_password = hashpw(password.encode("utf-8"), gensalt())
-        return hashed_password.decode("utf-8")
-    
-    class Config:
-        # Exclude confirmPassword from being serialized (e.g., in responses)
-        fields = {"confirmPassword": {"exclude": True}}
+        values["password"] = hashed_password.decode("utf-8")
+
+        # Remove confirmPassword from the values (optional)
+        values.pop("confirmPassword", None)
+
+        return values
+
+    # class Config:
+    #     # Exclude confirmPassword from being serialized (e.g., in responses)
+    #     fields = {"confirmPassword": {"exclude": True}}
     
 class postCommunityPost(BaseModel):
     title: str
