@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, root_validator
+from pydantic import BaseModel, EmailStr, model_validator
 from typing import Literal, Optional
 from bcrypt import hashpw, gensalt
 
@@ -11,14 +11,14 @@ class user(BaseModel):
 class createUser(BaseModel):  
     email: EmailStr
     password: str
-    confirmPassword: str
+    confirmPassword: Optional[str] = None
     date_created: str
 
-    @root_validator(pre=True)
+    @model_validator(mode="before")
     def validate_passwords(cls, values):
         password = values.get("password")
         confirm_password = values.get("confirmPassword")
-
+        print('passwords:', password, confirm_password)
         # Ensure both password and confirmPassword are provided
         if not password or not confirm_password:
             raise ValueError("Both password and confirmPassword are required")
@@ -36,9 +36,10 @@ class createUser(BaseModel):
 
         return values
 
-    # class Config:
-    #     # Exclude confirmPassword from being serialized (e.g., in responses)
-    #     fields = {"confirmPassword": {"exclude": True}}
+
+    class Config:
+        # Exclude confirmPassword from being serialized (e.g., in responses)
+        fields = {"confirmPassword": {"exclude": True}}
     
 class postCommunityPost(BaseModel):
     title: str
