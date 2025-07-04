@@ -18,7 +18,7 @@ class createUser(BaseModel):
     def validate_passwords(cls, values):
         password = values.get("password")
         confirm_password = values.get("confirmPassword")
-        print('passwords:', password, confirm_password)
+        
         # Ensure both password and confirmPassword are provided
         if not password or not confirm_password:
             raise ValueError("Both password and confirmPassword are required")
