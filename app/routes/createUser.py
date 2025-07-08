@@ -1,7 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from app.database import get_database
 from app.models import createUser
-from bson import ObjectId
 import uuid
 from app.utilityFunctions.sendEmail import send_authcode_via_email
 
@@ -10,23 +9,26 @@ router = APIRouter()
   # For generating unique authcodes
 
 @router.post("/generate-authcode")
-async def generate_authcode(email: str):
+async def generate_authcode(user: createUser):
     try:
         db = await get_database()
 
         # Check if the user already exists
-        existing_user = await db["users"].find_one({"email": email})
+        existing_user = await db["users"].find_one({"email": user.email})
         if existing_user:
             raise HTTPException(status_code=400, detail="User with this email already exists")
-
+        
         # Generate a unique authcode
         authcode = str(uuid.uuid4())
+        print(f"Generated authcode: {authcode}")
 
         # Save the authcode and email in the database
-        await db["authcodes"].insert_one({"email": email, "authcode": authcode})
+        await db["authcodes"].insert_one({"email":user.email, "authcode": authcode})
 
         # Send the authcode to the user (e.g., via email or SMS)
-        send_authcode_via_email(email, authcode)
+        send_authcode_via_email(user.email, authcode)
+
+   
 
 
         return {"message": "Authcode generated and sent to user"}
