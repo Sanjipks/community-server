@@ -18,14 +18,19 @@ class createUser(BaseModel):
     def validate_passwords(cls, values):
         password = values.get("password")
         confirm_password = values.get("confirmPassword")
+
         
         # Ensure both password and confirmPassword are provided
         if not password or not confirm_password:
             raise ValueError("Both password and confirmPassword are required")
+        
+  
 
         # Ensure passwords match
         if password != confirm_password:
             raise ValueError("Passwords do not match")
+        
+        
 
         # Hash the password using bcrypt
         hashed_password = hashpw(password.encode("utf-8"), gensalt())
