@@ -26,7 +26,7 @@ async def generate_authcode(user: createUser):
         await db["authcodes"].insert_one({"email":user.email, "authcode": authcode})
 
         # Send the authcode to the user (e.g., via email or SMS)
-        send_authcode_via_email(user.email, authcode)
+    #    send_authcode_via_email(user.email, authcode)
 
    
 

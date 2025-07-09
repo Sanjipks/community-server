@@ -2,6 +2,8 @@ from pydantic import BaseModel, EmailStr, model_validator
 from typing import Literal, Optional
 from bcrypt import hashpw, gensalt
 
+from app.utilityFunctions.passwordRules import check_password
+
 class user(BaseModel):
     name: str
     email: str
@@ -24,7 +26,7 @@ class createUser(BaseModel):
         if not password or not confirm_password:
             raise ValueError("Both password and confirmPassword are required")
         
-  
+        check_password(password)
 
         # Ensure passwords match
         if password != confirm_password:
