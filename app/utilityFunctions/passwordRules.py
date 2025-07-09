@@ -1,21 +1,30 @@
-def check_password(password: str) -> bool:
-    """
-    Check if the password meets the specified rules:
-    - At least 8 characters long
-    - Contains at least one uppercase letter
-    - Contains at least one lowercase letter
-    - Contains at least one digit
-    - Contains at least one special character
+import re
 
-    :param password: The password to check
-    :return: True if the password meets all rules, False otherwise
-    """
+def check_password(password: str):
+    # Check minimum length
     if len(password) < 8:
-        return False
-
-    has_upper = any(c.isupper() for c in password)
-    has_lower = any(c.islower() for c in password)
-    has_digit = any(c.isdigit() for c in password)
-    has_special = any(c in "!@#$%^&*()-_=+[]{}|;:',.<>?/" for c in password)
-
-    return has_upper and has_lower and has_digit and has_special    
+        raise ValueError("Password must be at least 8 characters long")
+    
+    # Check for at least one uppercase letter
+    if not any(char.isupper() for char in password):
+        raise ValueError("Password must contain at least one uppercase letter")
+    
+    # Check for at least one lowercase letter
+    if not any(char.islower() for char in password):
+        raise ValueError("Password must contain at least one lowercase letter")
+    
+    # Check for at least one digit
+    if not any(char.isdigit() for char in password):
+        raise ValueError("Password must contain at least one digit")
+    
+    # Check for at least one special character
+    if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", password):
+        raise ValueError("Password must contain at least one special character")
+    
+    # Check for prohibited patterns
+    prohibited_patterns = ["123456", "password", "qwerty"]
+    if any(pattern in password.lower() for pattern in prohibited_patterns):
+        raise ValueError("Password contains prohibited patterns")
+    
+    # If all checks pass, return True
+    return True
