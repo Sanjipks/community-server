@@ -20,10 +20,10 @@ async def generate_authcode(user: createUser):
         
         # Generate a unique authcode
         authcode = str(uuid.uuid4())
-        print(f"Generated authcode: {authcode}")
+        print(f"Generated authCode: {authcode}")
 
         # Save the authcode and email in the database
-        await db["authcodes"].insert_one({"email":user.email, "authcode": authcode})
+        await db["authCodes"].insert_one({"email":user.email, "authcode": authcode})
 
         # Send the authcode to the user (e.g., via email or SMS)
     #    send_authcode_via_email(user.email, authcode)
@@ -42,12 +42,12 @@ async def verify_authcode(email: str, authcode: str, user: createUser):
         db = await get_database()
 
         # Check if the authcode matches
-        authcode_entry = await db["authcodes"].find_one({"email": email, "authcode": authcode})
+        authcode_entry = await db["authCodes"].find_one({"email": email, "authcode": authcode})
         if not authcode_entry:
             raise HTTPException(status_code=400, detail="Invalid authcode")
 
         # Remove the authcode from the database (optional)
-        await db["authcodes"].delete_one({"email": email, "authcode": authcode})
+        await db["authCodes"].delete_one({"email": email, "authcode": authcode})
 
         # Finalize user creation
         user_dict = user.model_dump()
