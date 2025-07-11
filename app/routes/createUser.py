@@ -37,7 +37,7 @@ async def generate_authcode(user: createUser):
     
 
 @router.post("/verify-authcode")
-async def verify_authcode(email: str, authcode: str, user: createUser):
+async def verify_authcode( user: createUser, email: str, authcode: str):
     try:
         db = await get_database()
 
