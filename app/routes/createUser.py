@@ -16,8 +16,12 @@ async def generate_authcode(user: createUser):
         # Check if the user already exists
         existing_user = await db["users"].find_one({"email": user.email})
         if existing_user:
-            raise HTTPException(status_code=400, detail="User with this email already exists")
-        
+          raise HTTPException(
+        status_code=400, detail={ 
+        "status": "error",
+        "message": "User with this email already exists",
+        "code": "USER_EXISTS"})   
+
         # Generate a unique authcode
         authcode = str(uuid.uuid4())
         print(f"Generated authCode: {authcode}")
@@ -27,9 +31,6 @@ async def generate_authcode(user: createUser):
 
         # Send the authcode to the user (e.g., via email or SMS)
     #    send_authcode_via_email(user.email, authcode)
-
-   
-
 
         return {"message": "Authcode generated and sent to user"}
     except Exception as e:
