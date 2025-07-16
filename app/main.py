@@ -53,7 +53,7 @@ async def root():
 
 @app.get("/users")
 async def get_users():
-    users = await db["user"].find().to_list(length=100)
+    users = await db["users"].find().to_list(length=100)
     for user in users:
         user["id"] = str(user["_id"])
         del user["_id"]
