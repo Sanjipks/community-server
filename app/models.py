@@ -5,7 +5,8 @@ from bcrypt import hashpw, gensalt
 from app.utilityFunctions.passwordRules import check_password
 
 class user(BaseModel):
-    name: str
+    firstName: str
+    lastName: str
     email: str
     age: Optional[int] = None
     role: Literal["admin", "user", 'guest'] 
