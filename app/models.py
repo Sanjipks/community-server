@@ -11,6 +11,8 @@ class user(BaseModel):
     role: Literal["admin", "user", 'guest'] 
 
 class createUser(BaseModel):  
+    firstName: str
+    lastName: str
     email: EmailStr
     password: str
     confirmPassword: Optional[str] = None
