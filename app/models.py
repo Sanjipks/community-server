@@ -102,6 +102,13 @@ class postJoke(BaseModel):
     author: str
     timestamp: str
 
+class chatlist(BaseModel):
+    userId: str
+    username: str
+    profilePicture: str
+    lastMessage: Optional[str] = None
+    lastMessageTime: Optional[str] = None
+
 class chatMessages(BaseModel):
     sender: str
     receiver: str
