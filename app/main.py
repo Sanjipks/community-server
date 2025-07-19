@@ -8,6 +8,7 @@ from app.routes.community_posts import router as community_posts_router
 from app.routes.categories import router as categories_router
 from app.routes.fun import router as fun_router
 from app.routes.createUser import router as createUser_router
+from app.routes.userlist import router as userlist_router
 from dotenv import load_dotenv
 from bson import ObjectId
 load_dotenv()
@@ -35,7 +36,8 @@ print("Routers linked successfully!")
 app.include_router(community_posts_router, prefix="/community", tags=["Community Posts"])
 app.include_router(categories_router, prefix="/categories", tags=["Categories"])
 app.include_router(fun_router, prefix="/fun", tags=["fun"])
-app.include_router(createUser_router, prefix="/create-user", tags=["create-user"])
+app.include_router(createUser_router, prefix="/create-user", tags=["Create User"])
+app.include_router(userlist_router, prefix="/users", tags=["Userlist"])
 
 app.add_middleware(
     CORSMiddleware,
