@@ -6,7 +6,7 @@ from app.models import postCommunityPost, user
 
 
 router = APIRouter()
-@router.post("/chatlist/adduser") 
+@router.post("/adduser") 
 async def add_user(user: postCommunityPost):
     db = await get_database()
     user_dict = user.model_dump()
@@ -16,7 +16,7 @@ async def add_user(user: postCommunityPost):
     else:
         raise HTTPException(status_code=500, detail="Failed to add user")
     
-@router.get("/chatlist/getusers")
+@router.get("/getusers")
 async def get_users_list():
     db = await get_database()
     users = await db["user"].find().to_list(length=100)
@@ -26,7 +26,7 @@ async def get_users_list():
     return users
 
 
-@router.delete("/chatlist/removeuser") 
+@router.delete("/removeuser") 
 async def remove_user(request: user):
     db = await get_database()
     try:
