@@ -16,7 +16,7 @@ async def add_user(user: postCommunityPost):
     else:
         raise HTTPException(status_code=500, detail="Failed to add user")
     
-@router.get("/getusers")
+@router.get("/users")
 async def get_users_list():
     db = await get_database()
     users = await db["user"].find().to_list(length=100)
