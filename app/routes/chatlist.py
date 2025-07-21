@@ -6,6 +6,7 @@ from app.models import postCommunityPost, user
 
 
 router = APIRouter()
+
 @router.post("/adduser") 
 async def add_user(user: postCommunityPost):
     db = await get_database()
@@ -15,15 +16,17 @@ async def add_user(user: postCommunityPost):
         return {"message": "User added successfully"}
     else:
         raise HTTPException(status_code=500, detail="Failed to add user")
+
     
 @router.get("/users")
 async def get_users_list():
     db = await get_database()
-    users = await db["user"].find().to_list(length=100)
+    users = await db["chatlist"].find().to_list(length=100)
     for user in users:
         user["id"] = str(user["_id"])
         del user["_id"]
     return users
+
 
 
 @router.delete("/removeuser") 
