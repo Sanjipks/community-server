@@ -8,6 +8,7 @@ class user(BaseModel):
     firstName: str
     lastName: str
     email: str
+    image: Optional[str] = None
     age: Optional[int] = None
     role: Literal["admin", "user", 'guest'] 
 
