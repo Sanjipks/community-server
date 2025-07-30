@@ -33,7 +33,7 @@ async def generate_authcode(user: createUser):
         # Send the authcode to the user (e.g., via email or SMS)
     #    send_authcode_via_email(user.email, authcode)
 
-        return {"message": "Authcode generated and sent to user"}
+        return {"message": "Please check your email for the authcode, your authcode will expire in 10 minutes " }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating authcode: {str(e)}")
     
