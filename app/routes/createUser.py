@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from app.database import get_database
+from datetime import datetime, timedelta
 from app.models import createUser
 import uuid
 from app.utilityFunctions.sendEmail import send_authcode_via_email
@@ -23,7 +24,11 @@ async def generate_authcode(user: createUser):
         print(f"Generated authCode: {authcode}")
 
         # Save the authcode and email in the database
-        await db["authCodes"].insert_one({"email":user.email, "authcode": authcode})
+        await db["authCodes"].insert_one({
+            "email": user.email,
+            "authcode": authcode,
+            "createdAt": datetime.utcnow()  # Store the current UTC timestamp
+        })
 
         # Send the authcode to the user (e.g., via email or SMS)
     #    send_authcode_via_email(user.email, authcode)
@@ -34,7 +39,7 @@ async def generate_authcode(user: createUser):
     
 
 @router.post("/verify-authcode")
-async def verify_authcode( user: createUser, email: str, authcode: str):
+async def verify_authcode(user: createUser, email: str, authcode: str):
     try:
         db = await get_database()
 
@@ -42,6 +47,11 @@ async def verify_authcode( user: createUser, email: str, authcode: str):
         authcode_entry = await db["authCodes"].find_one({"email": email, "authcode": authcode})
         if not authcode_entry:
             raise HTTPException(status_code=400, detail="Invalid authcode")
+
+        # Check if the authcode has expired (10-minute limit)
+        created_at = authcode_entry.get("createdAt")
+        if not created_at or datetime.utcnow() > created_at + timedelta(minutes=10):
+            raise HTTPException(status_code=400, detail="Authcode has expired")
 
         # Remove the authcode from the database (optional)
         await db["authCodes"].delete_one({"email": email, "authcode": authcode})
