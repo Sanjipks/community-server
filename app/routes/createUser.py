@@ -7,7 +7,6 @@ from app.utilityFunctions.sendEmail import send_authcode_via_email
 
 router = APIRouter()
 
-  # For generating unique authcodes
 
 @router.post("/generate-authcode")
 async def generate_authcode(user: createUser):
@@ -19,11 +18,11 @@ async def generate_authcode(user: createUser):
         if existing_user:
           raise HTTPException(status_code=400, detail="User with this email already exists")   
 
-        # Generate a unique authcode
+
         authcode = str(uuid.uuid4())
         print(f"Generated authCode: {authcode}")
 
-        # Save the authcode and email in the database
+       
         await db["authCodes"].insert_one({
             "email": user.email,
             "authcode": authcode,
