@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from app.database import get_database
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from app.models import createUser
 import uuid
 from app.utilityFunctions.sendEmail import send_authcode_via_email
@@ -49,7 +49,7 @@ async def verify_authcode(user: createUser, email: str, authcode: str):
 
         # Check if the authcode has expired (10-minute limit)
         created_at = authcode_entry.get("createdAt")
-        if not created_at or datetime.utcnow() > created_at + timedelta(minutes=10):
+        if not created_at or datetime.now(timezone.utc) > created_at + timedelta(minutes=10):
             raise HTTPException(status_code=400, detail="Authcode has expired")
 
         # Remove the authcode from the database (optional)
