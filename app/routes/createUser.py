@@ -13,7 +13,6 @@ async def generate_authcode(user: createUser):
     try:
         db = await get_database()
 
-        # Check if the user already exists
         existing_user = await db["users"].find_one({"email": user.email})
         if existing_user:
           raise HTTPException(status_code=400, detail="User with this email already exists")   
