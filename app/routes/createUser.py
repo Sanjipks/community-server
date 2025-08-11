@@ -15,23 +15,35 @@ async def generate_authcode(user: createUser):
 
         existing_user = await db["users"].find_one({"email": user.email})
         if existing_user:
-          raise HTTPException(status_code=400, detail="User with this email already exists")   
-
+            raise HTTPException(status_code=400, detail="User with this email already exists")   
 
         authcode = str(uuid.uuid4())
         print(f"Generated authCode: {authcode}")
-
        
+        # Save authcode first
         await db["authCodes"].insert_one({
             "email": user.email,
             "authcode": authcode,
-            "createdAt": datetime.utcnow()  # Store the current UTC timestamp
+            "createdAt": datetime.now(timezone.utc)
         })
 
-        # Send the authcode to the user (e.g., via email or SMS)
-    #    send_authcode_via_email(user.email, authcode)
+        # Try to send email, but don't let it crash the flow
+        try:
+            send_authcode_via_email(user.email, authcode)
+            return {
+                "status": "success",
+                "message": "Please check your email for the authcode, your authcode will expire in 10 minutes",
+                "authcode": authcode  # Include authcode in response for testing/development
+            }
+        except Exception as email_error:
+            print(f"Warning: Failed to send email: {str(email_error)}")
+            # Return authcode in response since email failed
+            return {
+                "status": "warning",
+                "message": "Auth code generated but email delivery failed. Please use the code from the response.",
+                "authcode": authcode
+            }
 
-        return {"message": "Please check your email for the authcode, your authcode will expire in 10 minutes " }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating authcode: {str(e)}")
     
