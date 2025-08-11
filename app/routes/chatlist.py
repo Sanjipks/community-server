@@ -34,7 +34,6 @@ async def remove_user(request: user):
     db = await get_database()
     try:
         print('Received ID:', request.id)
-        # Convert the string id to ObjectId
         object_id = ObjectId(request.id)
         print('ObjectId:', object_id)
     except Exception as e:
