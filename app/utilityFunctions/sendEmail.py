@@ -9,3 +9,4 @@ def send_authcode_via_email(email: str, authcode: str):
             email,
             f"Subject: Your Verification Code\n\nYour verification code is: {authcode}"
         )
+
