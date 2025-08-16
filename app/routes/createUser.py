@@ -20,14 +20,13 @@ async def generate_authcode(user: createUser):
         authcode = str(uuid.uuid4())
         print(f"Generated authCode: {authcode}")
        
-        # Save authcode first
         await db["authCodes"].insert_one({
             "email": user.email,
             "authcode": authcode,
             "createdAt": datetime.now(timezone.utc)
         })
 
-        # Try to send email, but don't let it crash the flow
+        
         try:
             send_authcode_via_email(user.email, authcode)
             return {
