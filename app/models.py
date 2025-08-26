@@ -118,4 +118,7 @@ class chatMessages(BaseModel):
     timestamp: str
 
 
+class VerifyAuthCodeRequest(BaseModel):
+    useremail: EmailStr
+    authcode: str
 
