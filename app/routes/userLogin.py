@@ -61,7 +61,7 @@ async def verify_authcode(useremail: str, authcode: str):
         # Finalize user login
      
         if authcode_entry:
-            return {"message": "User loggen successfully", }
+            return {"message": "User logged in successfully", }
         else:
             raise HTTPException(status_code=500, detail="Failed to create user")
     except Exception as e:
