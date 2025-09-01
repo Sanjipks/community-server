@@ -16,12 +16,12 @@ async def login_user(useremail: str, userpassword: str):
         print(f"Generated authCode: {authcode}")
 
         await db["authCodes"].insert_one({
-            "email": user.email,
+            "email": useremail,
             "authcode": authcode,
             "createdAt": datetime.now(timezone.utc)
         })
     try:
-            send_authcode_via_email(user.email, authcode)
+            send_authcode_via_email(useremail, authcode)
             return {
                 "status": "success",
                 "message": "Please check your email for the authcode, your authcode will expire in 10 minutes",
