@@ -1,8 +1,7 @@
 from app.database import get_database
 from fastapi import APIRouter, HTTPException
 from datetime import datetime, timedelta, timezone
-from app.utilityFunctions.sendEmail import send_authcode_via_email
-from app.models import userSignIn, user   
+from app.utilityFunctions.sendEmail import send_authcode_via_email 
 import uuid
 
 router = APIRouter()

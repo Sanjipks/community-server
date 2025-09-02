@@ -1,9 +1,14 @@
 import smtplib
+from dotenv import load_dotenv
+import os
+load_dotenv()
+EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS")
+EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD") 
 
 def send_authcode_via_email(email: str, authcode: str):
     with smtplib.SMTP("smtp.gmail.com", 587) as server:
         server.starttls()
-        server.login("your_email@gmail.com", "your_password")
+        server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
         server.sendmail(
             "noreply@email.com",
             email,
