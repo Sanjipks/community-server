@@ -32,7 +32,6 @@ async def generate_authcode(user: createUser):
             return {
                 "status": "success",
                 "message": "Please check your email for the authcode, your authcode will expire in 10 minutes",
-                "authcode": authcode 
             }
         except Exception as email_error:
             print(f"Warning: Failed to send email: {str(email_error)}")
@@ -40,7 +39,7 @@ async def generate_authcode(user: createUser):
             return {
                 "status": "warning",
                 "message": "Auth code generated but email delivery failed. Please use the code from the response.",
-                "authcode": authcode
+                
             }
 
     except Exception as e:
