@@ -35,7 +35,7 @@ def send_authcode_via_email(email: str, authcode: str):
         <h2 style="color: #333;">Your Verification Code</h2>
         <p>Use the code below to verify your account:</p>
         <div style="background-color: #0044cc; color: white; padding: 15px; 
-                    font-size: 22px; text-align: center; width: 200px; 
+                    font-size: 22px; text-align: center; width: 600px; 
                     border-radius: 8px; margin: 20px auto;">
           {authcode}
         </div>
@@ -49,8 +49,11 @@ def send_authcode_via_email(email: str, authcode: str):
     msg.add_alternative(html_content, subtype="html")
 
     # Attach image (make sure 'logo.png' exists in your project folder)
-    with open("logo.png", "rb") as img:
-        msg.get_payload()[1].add_related(img.read(), "image", "png", cid="logo_image")
+    try:
+        with open("logo.png", "rb") as img:
+            msg.get_payload()[1].add_related(img.read(), "image", "png", cid="logo_image")
+    except FileNotFoundError:
+        print("⚠️ logo.png not found — sending email without image.")
 
     # Send via Gmail
     with smtplib.SMTP("smtp.gmail.com", 587) as server:
