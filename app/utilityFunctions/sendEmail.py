@@ -34,10 +34,12 @@ def send_authcode_via_email(email: str, authcode: str):
       <body style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px;">
         <h2 style="color: #333;">Your Verification Code</h2>
         <p>Use the code below to verify your account:</p>
+        <div style="text-align: center;background-color: #f9f9f9; width: 474px; height: 800px;">
         <div style="background-color: #0044cc; color: white; padding: 15px; 
                     font-size: 22px; text-align: center; width: 600px; 
                     border-radius: 8px; margin: 20px auto;">
           {authcode}
+        </div>
         </div>
         <p>Thank you for using our service!</p>
         <img src="cid:logo_image" alt="Logo" style="width:150px; margin-top:20px;" />
