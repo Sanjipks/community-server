@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from app.database import get_database
 from datetime import datetime, timedelta, timezone
-from app.models import createUser
+from app.models import createUser, VerifyAuthBody
 import uuid
 from app.utilityFunctions.sendEmail import send_authcode_via_email
 
@@ -47,13 +47,14 @@ async def generate_authcode(user: createUser):
     
 
 @router.post("/verify-authcode")
-async def verify_authcode(user: createUser,  authcode: str):
+async def verify_authcode(payload: VerifyAuthBody):
+    code = payload.authCodeRegister
+    user = payload.newUser
     
     try:
         db = await get_database()
-        print('value', user)
         # Check if the authcode matches
-        authcode_entry = await db["authCodes"].find_one({"email": user.email, "authcode": authcode})
+        authcode_entry = await db["authCodes"].find_one({"email": user.email, "authcode": code})
         if not authcode_entry:
             raise HTTPException(status_code=400, detail="Invalid authcode")
 
@@ -63,7 +64,7 @@ async def verify_authcode(user: createUser,  authcode: str):
             raise HTTPException(status_code=400, detail="Authcode has expired")
 
         # Remove the authcode from the database (optional)
-        await db["authCodes"].delete_one({"email": user.email, "authcode": authcode})
+        await db["authCodes"].delete_one({"email": user.email, "authcode": code})
 
         # Finalize user creation
         user_dict = user.model_dump()
