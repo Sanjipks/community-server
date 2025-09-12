@@ -52,7 +52,11 @@ class createUser(BaseModel):
     class Config:
         # Exclude confirmPassword from being serialized (e.g., in responses)
         fields = {"confirmPassword": {"exclude": True}}
-    
+
+class VerifyAuthBody(BaseModel):
+    authCodeRegister: str
+    newUser: createUser  
+
 class postCommunityPost(BaseModel):
     title: str
     content: str
