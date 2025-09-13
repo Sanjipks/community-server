@@ -20,7 +20,7 @@ async def generate_authcode(user: createUser):
         authcode = str(uuid.uuid4().hex[:8])
         print(f"Generated authCode: {authcode}")
        
-        await db["authCodes"].insert_one({
+        await db["authCodesForRegistration"].insert_one({
             "email": user.email,
             "authcode": authcode,
             "createdAt": datetime.now(timezone.utc)
@@ -54,7 +54,7 @@ async def verify_authcode(payload: VerifyAuthBody):
     try:
         db = await get_database()
         # Check if the authcode matches
-        authcode_entry = await db["authCodes"].find_one({"email": user.email, "authcode": code})
+        authcode_entry = await db["authCodesForRegistration"].find_one({"email": user.email, "authCode": code})
         if not authcode_entry:
             raise HTTPException(status_code=400, detail="Invalid authcode")
 
@@ -64,7 +64,7 @@ async def verify_authcode(payload: VerifyAuthBody):
             raise HTTPException(status_code=400, detail="Authcode has expired")
 
         # Remove the authcode from the database (optional)
-        await db["authCodes"].delete_one({"email": user.email, "authcode": code})
+        await db["authCodesForRegistration"].delete_one({"email": user.email, "authcode": code})
 
         # Finalize user creation
         user_dict = user.model_dump()
