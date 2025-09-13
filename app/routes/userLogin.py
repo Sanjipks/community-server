@@ -14,9 +14,9 @@ async def login_user(useremail: str, userpassword: str):
         authcode = str(uuid.uuid4())
         print(f"Generated authCode: {authcode}")
 
-        await db["authCodes"].insert_one({
+        await db["authCodesForLogin"].insert_one({
             "email": useremail,
-            "authcode": authcode,
+            "authCode": authcode,
             "createdAt": datetime.now(timezone.utc)
         })
     try:
@@ -45,7 +45,7 @@ async def verify_authcode(useremail: str, authcode: str):
         db = await get_database()
 
         # Check if the authcode matches
-        authcode_entry = await db["authCodes"].find_one({"user": useremail, "authcode": authcode})
+        authcode_entry = await db["authCodesForLogin"].find_one({"user": useremail, "authcode": authcode})
         if not authcode_entry:
             raise HTTPException(status_code=400, detail="Invalid authcode")
 
@@ -55,7 +55,7 @@ async def verify_authcode(useremail: str, authcode: str):
             raise HTTPException(status_code=400, detail="Authcode has expired")
 
         # Remove the authcode from the database (optional)
-        await db["authCodes"].delete_one({"user": useremail, "authcode": authcode})
+        await db["authCodesForLogin"].delete_one({"user": useremail, "authcode": authcode})
 
         # Finalize user login
      
