@@ -1,3 +1,5 @@
+from email.message import EmailMessage
+from email.utils import make_msgid
 import smtplib
 from dotenv import load_dotenv
 import os
@@ -5,17 +7,6 @@ load_dotenv()
 EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS")
 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD") 
 
-
-# def send_authcode_via_email(email: str, authcode: str):
-#     print('email', email, 'authcode', authcode)
-#     with smtplib.SMTP("smtp.gmail.com", 587) as server:
-#         server.starttls()
-#         server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
-#         server.sendmail(
-#             "noreply@email.com",
-#             email,
-#             f"Subject: Your Verification Code\n\nYour verification code is: {authcode}"
-#         )
 
 import smtplib
 from email.message import EmailMessage
@@ -25,8 +16,11 @@ from email.mime.image import MIMEImage
 def send_authcode_via_email(email: str, authcode: str):
     msg = EmailMessage()
     msg["Subject"] = "Your Verification Code"
-    msg["From"] = formataddr(("MyApp", EMAIL_ADDRESS))
+    msg["From"] = formataddr(("MyApp", 'donotreply@gmail.com'))
     msg["To"] = email
+
+    # logo_cid = make_msgid(domain="local")         # e.g. "<p2x9...@local>"
+    # logo_token = logo_cid[1:-1]  
 
     # HTML email content with inline styling and image reference
     html_content = f"""
@@ -55,7 +49,7 @@ def send_authcode_via_email(email: str, authcode: str):
             <!-- Header -->
             <tr>
               <td align="center" style="padding:24px 24px 8px;">
-                <img src="cid:logo_image" width="64" height="64" alt="Company logo" style="display:block; border:0; outline:none; text-decoration:none; width:64px; height:64px; border-radius:12px;" />
+                <img src="cid:logo_image" height="64" alt="Company logo" style="display:block; border:0; outline:none; text-decoration:none; width:64px; height:64px; border-radius:12px;" />
                 <div style="font-size:14px; color:#667085; margin-top:8px;">Secure verification</div>
               </td>
             </tr>
@@ -149,7 +143,7 @@ def send_authcode_via_email(email: str, authcode: str):
             <tr>
               <td align="center" style="padding:16px 8px;">
                 <p style="margin:0; font-size:12px; line-height:18px; color:#98A2B3;">
-                  © " " Your Company, Inc. All rights reserved.
+                  ©Community Nepal. All rights reserved.
                 </p>
               </td>
             </tr>
@@ -168,10 +162,10 @@ def send_authcode_via_email(email: str, authcode: str):
 
     # Attach image (make sure 'logo.png' exists in your project folder)
     try:
-        with open("logo.png", "rb") as img:
-            msg.get_payload()[1].add_related(img.read(), "image", "png", cid="logo_image")
+        with open("images/logo.svg", "rb") as img:
+            msg.get_payload()[1].add_related(img.read(), "image", "svg", cid="logo_image")
     except FileNotFoundError:
-        print("⚠️ logo.png not found — sending email without image.")
+        print("⚠️ logo.svg not found — sending email without image.")
 
     # Send via Gmail
     with smtplib.SMTP("smtp.gmail.com", 587) as server:
