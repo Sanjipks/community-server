@@ -5,8 +5,7 @@ from dotenv import load_dotenv
 import os
 load_dotenv()
 EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS")
-EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD") 
-
+EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 
 import smtplib
 from email.message import EmailMessage
@@ -16,7 +15,7 @@ from email.mime.image import MIMEImage
 def send_authcode_via_email(email: str, authcode: str):
     msg = EmailMessage()
     msg["Subject"] = "Your Verification Code"
-    msg["From"] = formataddr(("MyApp", 'donotreply@gmail.com'))
+    msg["From"] = formataddr(("MyApp", 'donotreply@communitynepal.com'))
     msg["To"] = email
 
     # logo_cid = make_msgid(domain="local")         # e.g. "<p2x9...@local>"
