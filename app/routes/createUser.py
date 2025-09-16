@@ -50,11 +50,12 @@ async def generate_authcode(user: createUser):
 async def verify_authcode(payload: VerifyAuthBody):
     code = payload.authCodeRegister
     user = payload.newUser
+    print(f"Verifying authcode for user: {user.email} with code: {code}")
     
     try:
         db = await get_database()
         # Check if the authcode matches
-        authcode_entry = await db["authCodesForRegistration"].find_one({"email": user.email, "authCode": code})
+        authcode_entry = await db["authCodesForRegistration"].find_one({"email": user.email, "authcode": code})
         if not authcode_entry:
             raise HTTPException(status_code=400, detail="Invalid authcode")
 
