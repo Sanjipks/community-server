@@ -7,7 +7,6 @@ from app.utilityFunctions.sendEmail import send_authcode_via_email
 
 router = APIRouter()
 
-
 @router.post("/generate-authcode")
 async def generate_authcode(user: createUser):
     try:
