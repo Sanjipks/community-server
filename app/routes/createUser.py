@@ -37,9 +37,7 @@ async def generate_authcode(user: createUser):
             "message": "Please check your email for the auth code. It expires in 10 minutes.",
         }
     except Exception as email_error:
-        # Email failed; still return success with guidance (avoid leaking the code unless you intend to)
-        # If you DO want to return the code on failure, uncomment the next line
-        # "authcode": authcode,
+        # Email failed; still return success with guidance
         return {
             "status": "warning",
             "message": "Auth code generated but email delivery failed. Please request a new code or contact support.",
