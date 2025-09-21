@@ -41,6 +41,34 @@ async def generate_authcode(user: createUser):
         return {
             "status": "warning",
             "message": "Auth code generated but email delivery failed. Please request a new code or contact support.",
+        
+        }
+    
+@router.post("/resend-authcode")
+async def resend_authcode(user: createUser):       
+    db = await get_database()
+
+    authcode = gen_code(8)  # e.g., 8-char code like "7X2K9PQA"
+    now = datetime.now(timezone.utc)
+
+    await db["authCodesForRegistration"].insert_one({
+        "email": user.email,
+        "authcode": authcode,
+        "createdAt": now
+    })
+
+    try:
+        from app.utilityFunctions.sendEmail import send_authcode_via_email
+        send_authcode_via_email(user.email, authcode)
+        return {
+            "status": "success",
+            "message": "A new auth code has been sent to your email. It expires in 10 minutes.",
+        }
+    except Exception as email_error:
+        # Email failed; still return success with guidance
+        return {
+            "status": "warning",
+            "message": "Auth code generated but email delivery failed. Please request a new code or contact support.",
         }
 
 @router.post("/verify-authcode")
