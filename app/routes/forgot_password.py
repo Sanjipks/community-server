@@ -64,7 +64,7 @@ async def reset_password_with_code(payload: ResetPasswordBody):
     # 2) Update the user's password (already hashed by your validator)
     result = await db["users"].update_one(
         {"email": payload.useremail},
-        {"$set": {"password": payload.password, "passwordUpdatedAt": datetime.now(timezone.utc)}}
+        {"$set": {"password": payload.password }}
     )
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="User not found")
