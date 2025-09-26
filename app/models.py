@@ -57,6 +57,39 @@ class VerifyAuthBody(BaseModel):
     authCodeRegister: str
     newUser: createUser  
 
+class ResetPasswordBody(BaseModel):
+    useremail: EmailStr
+    resetCode: str
+    password: str
+    confirmPassword: str
+     
+    def validate_passwords(cls, values):
+        password = values.get("password")
+        confirm_password = values.get("confirmPassword")
+
+        print("Validating passwords...")
+        print(f"Password: {password}, Confirm Password: {confirm_password}, firstName: {values.get('firstName')}")
+        # Ensure both password and confirmPassword are provided
+        if not password or not confirm_password:
+            raise ValueError("Both password and confirmPassword are required")
+        
+        check_password(password)
+
+        # Ensure passwords match
+        if password != confirm_password:
+            raise ValueError("Passwords do not match")
+        
+        
+
+        # Hash the password using bcrypt
+        hashed_password = hashpw(password.encode("utf-8"), gensalt())
+        values["password"] = hashed_password.decode("utf-8")
+
+        # Remove confirmPassword from the values (optional)
+        values.pop("confirmPassword", None)
+
+        return values
+
 class postCommunityPost(BaseModel):
     title: str
     content: str
