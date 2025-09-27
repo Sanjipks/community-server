@@ -45,7 +45,7 @@ async def generate_password_reset_code(useremail: str):
         raise HTTPException(status_code=500, detail=f"Error generating password reset code: {str(e)}")
     
 
-@router.post("/reset-password-with-code")
+@router.post("/submit-new-password-with-code")
 async def reset_password_with_code(payload: ResetPasswordBody):
     db = await get_database()
 

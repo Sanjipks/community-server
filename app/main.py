@@ -9,6 +9,7 @@ from app.routes.createUser import router as createUser_router
 from app.routes.userLogin import router as userLogin_router
 from app.routes.userlist import router as userlist_router
 from app.routes.chatlist import router as chatlist_router
+from app.routes.forgot_password import router as forgotpassword_router
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -41,6 +42,7 @@ app.include_router(createUser_router, prefix="/create-user", tags=["Create User"
 app.include_router(userLogin_router, prefix="/login-user", tags=["User Lgoin"])
 app.include_router(userlist_router, prefix="/users", tags=["Userlist"])
 app.include_router(chatlist_router, prefix="/chatlist", tags=["Chatlist"])
+app.include_router(forgotpassword_router, prefix="/forgotpassword", tags=["Forgot Password"])
 
 app.add_middleware(
     CORSMiddleware,
