@@ -30,7 +30,6 @@ async def generate_password_reset_code(useremail: str):
             return {
                 "status": "success",
                 "message": "Please check your email for the password reset code, your code will expire in 10 minutes",
-                "reset_code": reset_code 
             }
     except Exception as email_error:
             print(f"Warning: Failed to send email: {str(email_error)}")
@@ -38,7 +37,6 @@ async def generate_password_reset_code(useremail: str):
             return {
                 "status": "warning",
                 "message": "Password reset code generated but email delivery failed. Please use the code from the response.",
-                "reset_code": reset_code
             }
 
     except Exception as e:
