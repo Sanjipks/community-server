@@ -160,3 +160,9 @@ class VerifyAuthCodeRequest(BaseModel):
     useremail: EmailStr
     authcode: str
 
+class  NewsItem (BaseModel): 
+  id: int
+  title: str
+  description: str
+  image: str
+  link: str
