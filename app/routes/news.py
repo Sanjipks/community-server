@@ -1,5 +1,7 @@
+
+from fastapi import APIRouter, HTTPException
 from app.database import get_database
-from fastapi import APIRouter
+from app.models import NewsItem
 
 
 router = APIRouter()
@@ -13,3 +15,13 @@ async def get_communitynews():
         del news["_id"]
    
     return news
+
+@router.post("/addnews")
+async def add_news(news: NewsItem):
+    db = await get_database()
+    news_dict = news.model_dump
+    result = await db["community-news"].insert_one(news_dict)
+    if result.inserted_id:
+        return {"message": "News added successfully"}
+    else:
+        raise HTTPException(status_code=500, detail="Failed to add news") 
