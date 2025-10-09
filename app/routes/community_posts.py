@@ -29,3 +29,17 @@ async def post_community_post(post: postCommunityPost):
             raise HTTPException(status_code=500, detail="Failed to create post")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error creating post: {str(e)}")
+    
+
+@router.delete("/delete-community-post")
+async def delete_posted_category(request: postCommunityPost):
+    try:
+        db = await get_database()
+        object_id = ObjectId(request.id)  # Convert the string id to ObjectId
+        result = await db["communityPost"].delete_one({"_id": object_id})
+        if result.deleted_count == 1:
+            return {"message": "Category deleted successfully"}
+        else:
+            raise HTTPException(status_code=404, detail="Category not found")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error deleting category: {str(e)}")
