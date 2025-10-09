@@ -127,7 +127,6 @@ class postedCategory(postCategory):
 class deleteCategory(postCategory):
     id: str
     
-
 class postedJokes(BaseModel):
     id: str
     title: str
