@@ -13,3 +13,12 @@ async def get_users():
         del user["_id"]
    
     return users
+
+@router.delete("/delete-user")
+async def delete_user(useremail: str):
+    db = await get_database()
+    result = await db["users"].delete_one({"email": useremail})
+    if result.deleted_count == 1:
+        return {"message": "User deleted successfully"}
+    else:
+        return {"message": "User not found"}     
