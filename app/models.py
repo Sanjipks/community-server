@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr, model_validator
-from typing import Literal, Optional
+from typing import Literal, Optional, List
 from bcrypt import hashpw, gensalt
 
 from app.utilityFunctions.passwordRules import check_password
@@ -112,6 +112,10 @@ class CommunityNews(BaseModel):
     descreption: str
     image: str
     link: str
+
+#can be used for bulk delete witj ids in the body
+class BulkDeleteBody(BaseModel):
+    ids: List[str]
 
 class postCategory(BaseModel):
     title: str

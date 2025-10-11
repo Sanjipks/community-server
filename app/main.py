@@ -39,7 +39,7 @@ origins = [
 print("Routers linked successfully!")
 
 app.include_router(community_posts_router, prefix="/community", tags=["Community Posts"])
-app.include_router(communitynews_router, prefix="/community", tags=["Community news"])
+app.include_router(communitynews_router, prefix="/communitynews", tags=["Community News"])
 app.include_router(categories_router, prefix="/categories", tags=["Categories"])
 app.include_router(fun_router, prefix="/fun", tags=["fun"])
 app.include_router(createUser_router, prefix="/create-user", tags=["Create User"])
