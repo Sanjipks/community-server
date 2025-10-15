@@ -2,7 +2,7 @@ from datetime import datetime
 from fastapi import APIRouter, HTTPException
 from bson import ObjectId
 from app.database import get_database
-from app.models import postCategory, deleteCategory, postedCategory
+from app.models import postCategory, deleteCategory, postedCategory, BulkDeleteBody
 
 router = APIRouter()
 
@@ -50,3 +50,24 @@ async def delete_posted_category(request: deleteCategory):
             raise HTTPException(status_code=404, detail="Category not found")
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error deleting category: {str(e)}")
+    
+@router.post("/delete-multiple-categories")
+async def bulk_delete_categories(request: BulkDeleteBody):
+    ids = request.ids
+    db = await get_database()
+    object_ids = []
+    if not isinstance(ids, list) or not all(isinstance(id, str) for id in ids):
+        raise HTTPException(status_code=400, detail="Invalid IDs format. Expected a list of strings.")
+    for id in ids:
+        try:
+            object_id = ObjectId(id)
+            object_ids.append(object_id)
+        except Exception as e:
+            print(f"Error converting ID {id} to ObjectId: {str(e)}")
+            raise HTTPException(status_code=400, detail=f"Invalid category ID format: {id}")
+
+    result = await db["postedCategory"].delete_many({"_id": {"$in": object_ids}})
+    if result.deleted_count > 0:
+        return {"message": f"Deleted {result.deleted_count} categories successfully"}
+    else:
+        raise HTTPException(status_code=404, detail="No categories found to delete")
