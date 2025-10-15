@@ -22,3 +22,12 @@ async def delete_user(useremail: str):
         return {"message": "User deleted successfully"}
     else:
         return {"message": "User not found"}     
+    
+@router.post("/delete-multiple-users")
+async def bulk_delete_users(useremails: list[str]):
+    db = await get_database()
+    result = await db["users"].delete_many({"email": {"$in": useremails}})
+    if result.deleted_count > 0:
+        return {"message": f"{result.deleted_count} users deleted successfully"}
+    else:
+        return {"message": "No users found to delete"}
