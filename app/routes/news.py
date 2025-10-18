@@ -1,6 +1,8 @@
-from fastapi import APIRouter, HTTPException
+from datetime import datetime
+from fastapi import APIRouter, Form, File, UploadFile, HTTPException
+from pathlib import Path
 from app.database import get_database
-from app.models import NewsItem, BulkDeleteBody
+from app.models import BulkDeleteBody
 from bson import ObjectId
 
 
@@ -17,14 +19,37 @@ async def get_communitynews():
     return news
 
 @router.post("/addnews")
-async def add_news(news: NewsItem):
+async def add_news(
+    title: str = Form(...),
+    description: str = Form(...),
+    author: str = Form(...),
+    image: UploadFile = File(...)
+):
     db = await get_database()
-    news_dict = news.model_dump
+
+    # Save the uploaded file to a local folder
+    upload_dir = Path("uploads")
+    upload_dir.mkdir(exist_ok=True)
+    file_path = upload_dir / image.filename
+
+    with open(file_path, "wb") as buffer:
+        buffer.write(await image.read())
+
+    # Prepare data for MongoDB
+    news_dict = {
+        "title": title,
+        "description": description,
+        "author": author,
+        "image": str(file_path),
+        "postedDate": datetime.now().isoformat()   
+    }
+
     result = await db["community-news"].insert_one(news_dict)
+
     if result.inserted_id:
         return {"message": "News added successfully"}
     else:
-        raise HTTPException(status_code=500, detail="Failed to add news") 
+        raise HTTPException(status_code=500, detail="Failed to add news")
     
 @router.delete("/allnews/{id}")
 async def delete_news(id: str):

@@ -168,4 +168,6 @@ class  NewsItem (BaseModel):
   title: str
   description: str
   image: str
+  author: str
+  postedDate: str
   link: str
