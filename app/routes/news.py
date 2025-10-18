@@ -16,7 +16,7 @@ async def get_communitynews():
         news["id"] = str(news["_id"])
         del news["_id"]
    
-    return news
+    return communitynewses
 
 @router.post("/addnews")
 async def add_news(
