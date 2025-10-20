@@ -1,9 +1,16 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from fastapi import APIRouter, Form, File, UploadFile, HTTPException
 from pathlib import Path
 from app.database import get_database
 from app.models import BulkDeleteBody
 from bson import ObjectId
+from dotenv import load_dotenv
+import os
+
+
+load_dotenv()
+
+IMAGE_UPLOADPATH = os.getenv("COMMUNITY_UPLOADPATH")
 
 
 router = APIRouter()
@@ -18,6 +25,7 @@ async def get_communitynews():
    
     return communitynewses
 
+
 @router.post("/addnews")
 async def add_news(
     title: str = Form(...),
@@ -27,30 +35,51 @@ async def add_news(
 ):
     db = await get_database()
 
-    # Save the uploaded file to a local folder
-    upload_dir = Path("uploads")
-    upload_dir.mkdir(exist_ok=True)
-    file_path = upload_dir / image.filename
-
-    with open(file_path, "wb") as buffer:
-        buffer.write(await image.read())
-
-    # Prepare data for MongoDB
+    #create a placeholder document in MongoDB (no image yet)
     news_dict = {
         "title": title,
         "description": description,
         "author": author,
-        "image": str(file_path),
-        "postedDate": datetime.now().isoformat()   
+        "image": None,  # temporarily empty
+        "postedDate": datetime.now(timezone.utc).isoformat()
     }
 
-    result = await db["community-news"].insert_one(news_dict)
+    insert_result = await db["community-news"].insert_one(news_dict)
 
-    if result.inserted_id:
-        return {"message": "News added successfully"}
-    else:
-        raise HTTPException(status_code=500, detail="Failed to add news")
-    
+    if not insert_result.inserted_id:
+        raise HTTPException(status_code=500, detail="Failed to create news entry")
+
+    news_id = str(insert_result.inserted_id)
+
+    # build a unique image path tied to this ID
+    upload_dir = Path(IMAGE_UPLOADPATH) / news_id  # optional per-document folder
+    upload_dir.mkdir(parents=True, exist_ok=True)
+
+    # You can just use the original extension, but rename to the id
+    ext = Path(image.filename).suffix or ".jpg"
+    file_path = upload_dir / f"{news_id}{ext}"
+
+    # save image to that path
+    try:
+        with open(file_path, "wb") as buffer:
+            buffer.write(await image.read())
+    except Exception as e:
+        # rollback: delete the Mongo entry if image write fails
+        await db["community-news"].delete_one({"_id": ObjectId(news_id)})
+        raise HTTPException(status_code=500, detail=f"File upload failed: {str(e)}")
+
+    #update the document with the final image path
+    await db["community-news"].update_one(
+        {"_id": ObjectId(news_id)},
+        {"$set": {"image": str(file_path)}}
+    )
+
+    return {
+        "message": "News added successfully",
+        "id": news_id,
+        "image": str(file_path)
+    }
+
 @router.delete("/allnews/{id}")
 async def delete_news(id: str):
     db = await get_database()
