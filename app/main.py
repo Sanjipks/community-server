@@ -8,7 +8,6 @@ from app.routes.fun import router as fun_router
 from app.routes.createUser import router as createUser_router
 from app.routes.userLogin import router as userLogin_router
 from app.routes.userlist import router as userlist_router
-# from app.routes.userlist import router as deleteUser_router
 from app.routes.chatlist import router as chatlist_router
 from app.routes.forgot_password import router as forgotpassword_router
 from app.routes.news import router as communitynews_router
