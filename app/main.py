@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from app.database import get_database
@@ -27,6 +28,9 @@ async def lifespan(app: FastAPI):
    
 
 app = FastAPI(lifespan=lifespan)
+
+
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 ORIGINS = os.getenv("ORIGINS")
 
