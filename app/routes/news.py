@@ -7,91 +7,90 @@ from bson import ObjectId
 from dotenv import load_dotenv
 import os
 
-
 load_dotenv()
 
-
-
 router = APIRouter()
+
+# Configure where files live on disk and how they are publicly served
+UPLOAD_ROOT = Path(os.getenv("UPLOAD_ROOT", "uploads")).resolve()
+BACKEND_URL = os.getenv("BACKEND_URL")  # used to build public URLs
+
+# Make sure folder exists
+UPLOAD_ROOT.mkdir(parents=True, exist_ok=True)
+
 
 @router.get("/allnews")
 async def get_communitynews():
     db = await get_database()
-    communitynewses = await db["community-news"].find().to_list(length=100)
-    for news in communitynewses:
+    items = await db["community-news"].find().to_list(length=100)
+    for news in items:
         news["id"] = str(news["_id"])
         del news["_id"]
-   
-    return communitynewses
+    return items
 
 
 @router.post("/addnews")
 async def add_news(
-   
     title: str = Form(...),
     description: str = Form(...),
     author: str = Form(...),
-    image: UploadFile = File(...)
+    image: UploadFile = File(...),
 ):
     db = await get_database()
 
-    #create a placeholder document in MongoDB (no image yet)
-    news_dict = {
+    # 1) Create Mongo doc without image first
+    news_doc = {
         "title": title,
         "description": description,
         "author": author,
-        "image": None,  # temporarily empty
-        "postedDate": datetime.now(timezone.utc).isoformat()
+        "image": None,  # set later
+        "postedDate": datetime.now(timezone.utc).isoformat(),
     }
-
-    insert_result = await db["community-news"].insert_one(news_dict)
-
+    insert_result = await db["community-news"].insert_one(news_doc)
     if not insert_result.inserted_id:
         raise HTTPException(status_code=500, detail="Failed to create news entry")
 
     news_id = str(insert_result.inserted_id)
 
-    # build a unique image path tied to this ID
-    upload_dir = Path('uploads') / news_id  # optional per-document folder
-    upload_dir.mkdir(parents=True, exist_ok=True)
+    # 2) Prepare per-doc folder + filename
+    per_doc_dir = (UPLOAD_ROOT / news_id)
+    per_doc_dir.mkdir(parents=True, exist_ok=True)
 
-    # You can just use the original extension, but rename to the id
-    ext = Path(image.filename).suffix or ".jpg"
-    file_path = upload_dir / f"{news_id}{ext}"
-    image_url = f"{IMAGE_SERVER }/{ file_path}"
-    # save image to that path
+    ext = Path(image.filename).suffix.lower() or ".jpg"
+    # (Optional) whitelist extensions:
+    if ext not in {".jpg", ".jpeg", ".png", ".webp", ".gif"}:
+        ext = ".jpg"
+
+    file_path = per_doc_dir / f"{news_id}{ext}"            # absolute path on disk
+    # Build a URL based on how you mounted static files in main.py: app.mount("/uploads", StaticFiles(directory=UPLOAD_ROOT))
+    rel_path = file_path.relative_to(UPLOAD_ROOT).as_posix()  # e.g. "68fc.../68fc....jpg"
+    image_url = f"{BACKEND_URL}/uploads/{rel_path}"
+
+    # 3) Save the file
     try:
-        with open(file_path, "wb") as buffer:
-            buffer.write(await image.read())
-
-      # build full URL (uses the request host)
-        
+        contents = await image.read()  # read once
+        with file_path.open("wb") as buffer:
+            buffer.write(contents)
     except Exception as e:
-        # rollback: delete the Mongo entry if image write fails
+        # Roll back the Mongo insert if file write fails
         await db["community-news"].delete_one({"_id": ObjectId(news_id)})
-        raise HTTPException(status_code=500, detail=f"File upload failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"File upload failed: {e}")
 
-    #update the document with the final image path
+    # 4) Update Mongo with the public image URL
     await db["community-news"].update_one(
         {"_id": ObjectId(news_id)},
-        {"$set": {"image": str(image_url)}}
+        {"$set": {"image": image_url}},
     )
 
-    return {
-        "message": "News added successfully",
-        "id": news_id,
-        "image": str(image_url)
-    }
+    return {"message": "News added successfully", "id": news_id, "image": image_url}
+
 
 @router.delete("/allnews/{id}")
 async def delete_news(id: str):
     db = await get_database()
     try:
-        print('Received ID:', id)
         object_id = ObjectId(id)
-        print('ObjectId:', object_id)
-    except Exception as e:
-        print("Error occurred:", str(e))
+    except Exception:
         raise HTTPException(status_code=400, detail="Invalid news ID format")
 
     result = await db["community-news"].delete_one({"_id": object_id})
@@ -99,20 +98,17 @@ async def delete_news(id: str):
         return {"message": "News deleted successfully"}
     else:
         raise HTTPException(status_code=404, detail="News not found")
-    
-#to delete multiple news items by their IDs
+
+
 @router.post("/allnews/delete-multiple-news")
 async def bulk_delete_news(body: BulkDeleteBody):
-    ids = body.ids
     db = await get_database()
     object_ids = []
-    for id in ids:
+    for _id in body.ids:
         try:
-            object_id = ObjectId(id)
-            object_ids.append(object_id)
-        except Exception as e:
-            print(f"Error converting ID {id} to ObjectId: {str(e)}")
-            raise HTTPException(status_code=400, detail=f"Invalid news ID format: {id}")
+            object_ids.append(ObjectId(_id))
+        except Exception:
+            raise HTTPException(status_code=400, detail=f"Invalid news ID format: {_id}")
 
     result = await db["community-news"].delete_many({"_id": {"$in": object_ids}})
     if result.deleted_count > 0:
