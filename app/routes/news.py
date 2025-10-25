@@ -10,7 +10,6 @@ import os
 
 load_dotenv()
 
-IMAGE_UPLOADPATH = os.getenv("COMMUNITY_UPLOADPATH")
 
 
 router = APIRouter()
@@ -28,6 +27,7 @@ async def get_communitynews():
 
 @router.post("/addnews")
 async def add_news(
+   
     title: str = Form(...),
     description: str = Form(...),
     author: str = Form(...),
@@ -52,17 +52,20 @@ async def add_news(
     news_id = str(insert_result.inserted_id)
 
     # build a unique image path tied to this ID
-    upload_dir = Path(IMAGE_UPLOADPATH) / news_id  # optional per-document folder
+    upload_dir = Path('uploads') / news_id  # optional per-document folder
     upload_dir.mkdir(parents=True, exist_ok=True)
 
     # You can just use the original extension, but rename to the id
     ext = Path(image.filename).suffix or ".jpg"
     file_path = upload_dir / f"{news_id}{ext}"
-
+    image_url = f"{IMAGE_SERVER }/{ file_path}"
     # save image to that path
     try:
         with open(file_path, "wb") as buffer:
             buffer.write(await image.read())
+
+      # build full URL (uses the request host)
+        
     except Exception as e:
         # rollback: delete the Mongo entry if image write fails
         await db["community-news"].delete_one({"_id": ObjectId(news_id)})
@@ -71,13 +74,13 @@ async def add_news(
     #update the document with the final image path
     await db["community-news"].update_one(
         {"_id": ObjectId(news_id)},
-        {"$set": {"image": str(file_path)}}
+        {"$set": {"image": str(image_url)}}
     )
 
     return {
         "message": "News added successfully",
         "id": news_id,
-        "image": str(file_path)
+        "image": str(image_url)
     }
 
 @router.delete("/allnews/{id}")
