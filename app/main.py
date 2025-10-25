@@ -13,6 +13,7 @@ from app.routes.chatlist import router as chatlist_router
 from app.routes.forgot_password import router as forgotpassword_router
 from app.routes.news import router as communitynews_router
 from dotenv import load_dotenv
+from pathlib import Path
 
 
 load_dotenv()
@@ -30,7 +31,11 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+UPLOAD_ROOT = os.getenv("UPLOAD_ROOT", "uploads")
+Path(UPLOAD_ROOT).mkdir(parents=True, exist_ok=True)
+
+# Serve the external directory at /uploads
+app.mount("/uploads", StaticFiles(directory=UPLOAD_ROOT), name="uploads")
 
 ORIGINS = os.getenv("ORIGINS")
 
