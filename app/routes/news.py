@@ -11,11 +11,11 @@ load_dotenv()
 
 router = APIRouter()
 
-# Configure where files live on disk and how they are publicly served
+# configure where files live on disk and how they are publicly served
 UPLOAD_ROOT = Path(os.getenv("UPLOAD_ROOT", "uploads")).resolve()
 BACKEND_URL = os.getenv("BACKEND_URL")  # used to build public URLs
 
-# Make sure folder exists
+# make sure folder exists
 UPLOAD_ROOT.mkdir(parents=True, exist_ok=True)
 
 
@@ -38,7 +38,7 @@ async def add_news(
 ):
     db = await get_database()
 
-    # 1) Create Mongo doc without image first
+    #create Mongo doc without image first because the image filename depends on the generated ID from Mongo
     news_doc = {
         "title": title,
         "description": description,
@@ -52,36 +52,35 @@ async def add_news(
 
     news_id = str(insert_result.inserted_id)
 
-    # 2) Prepare per-doc folder + filename
+    # prepare per-doc folder + filename
     per_doc_dir = (UPLOAD_ROOT / news_id)
     per_doc_dir.mkdir(parents=True, exist_ok=True)
 
     ext = Path(image.filename).suffix.lower() or ".jpg"
-    # (Optional) whitelist extensions:
+    # whitelist extensions:
     if ext not in {".jpg", ".jpeg", ".png", ".webp", ".gif"}:
         ext = ".jpg"
 
     file_path = per_doc_dir / f"{news_id}{ext}"            # absolute path on disk
-    # Build a URL based on how you mounted static files in main.py: app.mount("/uploads", StaticFiles(directory=UPLOAD_ROOT))
+    # build a URL based on how you mounted static files in main.py: app.mount("/uploads", StaticFiles(directory=UPLOAD_ROOT))
     rel_path = file_path.relative_to(UPLOAD_ROOT).as_posix()  # e.g. "68fc.../68fc....jpg"
     image_url = f"{BACKEND_URL}/uploads/{rel_path}"
 
-    # 3) Save the file
+    # save the file
     try:
         contents = await image.read()  # read once
         with file_path.open("wb") as buffer:
             buffer.write(contents)
     except Exception as e:
-        # Roll back the Mongo insert if file write fails
+        # roll back the Mongo insert if file write fails
         await db["community-news"].delete_one({"_id": ObjectId(news_id)})
         raise HTTPException(status_code=500, detail=f"File upload failed: {e}")
 
-    # 4) Update Mongo with the public image URL
+    # update Mongo with the public image URL
     await db["community-news"].update_one(
         {"_id": ObjectId(news_id)},
         {"$set": {"image": image_url}},
     )
-
     return {"message": "News added successfully", "id": news_id, "image": image_url}
 
 
