@@ -2,7 +2,7 @@ from datetime import datetime
 from fastapi import APIRouter, HTTPException
 from bson import ObjectId
 from app.database import get_database
-from app.models import postJoke, postedJokes
+from app.models import postJoke
 
 router = APIRouter()
 
@@ -32,20 +32,20 @@ async def posted_jokes():
             joke["timestamp"] = joke["timestamp"].isoformat()
     return postedJokes
 
-@router.delete("/delete-joke")
-async def delete_joke(request: postJoke):
+@router.delete("/posted-jokes/{id}")
+async def delete_joke(id:str):
+    jokeId = id
     db = await get_database()
+    print('ObjectId:', jokeId)
     try:
-       
-        # Convert the string id to ObjectId
-        object_id = ObjectId(request.id)
-        print('ObjectId:', object_id)
+        object_id = ObjectId(jokeId)
+        print('ObjectId:', jokeId)
     except Exception as e:
         print("Error occurred:", str(e))
         raise HTTPException(status_code=400, detail="Invalid joke ID format")
 
     result = await db["postJoke"].delete_one({"_id": object_id})
     if result.deleted_count == 1:
-        return {"message": "joke deleted successfully"}
+        return {"message": "joke deleted successfully", "status": "success"}
     else:
         raise HTTPException(status_code=404, detail="joke not found")
