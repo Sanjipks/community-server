@@ -36,10 +36,8 @@ async def posted_jokes():
 async def delete_joke(id:str):
     jokeId = id
     db = await get_database()
-    print('ObjectId:', jokeId)
     try:
         object_id = ObjectId(jokeId)
-        print('ObjectId:', jokeId)
     except Exception as e:
         print("Error occurred:", str(e))
         raise HTTPException(status_code=400, detail="Invalid joke ID format")
