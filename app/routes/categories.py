@@ -38,11 +38,11 @@ async def post_category(category: postCategory):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error posting category: {str(e)}")
 
-@router.delete("/delete-posted-category")
-async def delete_posted_category(request: deleteCategory):
+@router.delete("/delete-posted-category?{id}")
+async def delete_posted_category(id: str):
     try:
         db = await get_database()
-        object_id = ObjectId(request.id)  # Convert the string id to ObjectId
+        object_id = ObjectId(id)  # Convert the string id to ObjectId
         result = await db["postedCategory"].delete_one({"_id": object_id})
         if result.deleted_count == 1:
             return {"message": "Category deleted successfully"}
