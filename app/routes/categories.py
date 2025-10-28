@@ -45,7 +45,7 @@ async def delete_posted_category(id: str):
         object_id = ObjectId(id)  # Convert the string id to ObjectId
         result = await db["postedCategory"].delete_one({"_id": object_id})
         if result.deleted_count == 1:
-            return {"message": "Category deleted successfully"}
+            return {"message": "Category deleted successfully,", "status": "success"}
         else:
             raise HTTPException(status_code=404, detail="Category not found")
     except Exception as e:
