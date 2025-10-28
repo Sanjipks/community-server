@@ -2,7 +2,7 @@ from bson import ObjectId
 from app.database import get_database
 from fastapi import APIRouter, HTTPException
 
-from app.models import postCommunityPost, user
+from app.models import postCommunityPost
 
 
 router = APIRouter()
@@ -30,11 +30,10 @@ async def get_users_list():
 
 
 @router.delete("/removeuser") 
-async def remove_user(request: user):
+async def remove_user(id:str):
     db = await get_database()
     try:
-        print('Received ID:', request.id)
-        object_id = ObjectId(request.id)
+        object_id = ObjectId(id)
         print('ObjectId:', object_id)
     except Exception as e:
         print("Error occurred:", str(e))
