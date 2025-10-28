@@ -2,7 +2,7 @@ from datetime import datetime
 from fastapi import APIRouter, HTTPException
 from bson import ObjectId
 from app.database import get_database
-from app.models import postCategory, deleteCategory, postedCategory, BulkDeleteBody
+from app.models import postCategory, postedCategory, BulkDeleteBody
 
 router = APIRouter()
 
@@ -38,7 +38,7 @@ async def post_category(category: postCategory):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error posting category: {str(e)}")
 
-@router.delete("/delete-posted-category?{id}")
+@router.delete("/posted-categories/{id}")
 async def delete_posted_category(id: str):
     try:
         db = await get_database()
