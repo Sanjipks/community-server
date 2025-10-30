@@ -32,7 +32,7 @@ async def post_category(category: postCategory):
         category_dict = category.model_dump()
         result = await db["postedCategory"].insert_one(category_dict)
         if result.inserted_id:
-            return {"message": "Category Posted Successfully", "id": str(result.inserted_id)}
+            return {"message": "Category Posted Successfully", "id": str(result.inserted_id), "status": "success"}
         else:
             raise HTTPException(status_code=500, detail="Failed to post category")
     except Exception as e:
