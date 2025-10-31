@@ -81,7 +81,7 @@ async def add_news(
         {"_id": ObjectId(news_id)},
         {"$set": {"image": image_url}},
     )
-    return {"message": "News added successfully", "id": news_id, "image": image_url}
+    return { "status": "success", "message": "News added successfully", "id": news_id, "image": image_url }
 
 
 @router.delete("/allnews/{id}")
@@ -94,7 +94,7 @@ async def delete_news(id: str):
 
     result = await db["community-news"].delete_one({"_id": object_id})
     if result.deleted_count == 1:
-        return {"message": "News deleted successfully"}
+        return {"status":"success", "message": "News deleted successfully"}
     else:
         raise HTTPException(status_code=404, detail="News not found")
 
@@ -111,6 +111,6 @@ async def bulk_delete_news(body: BulkDeleteBody):
 
     result = await db["community-news"].delete_many({"_id": {"$in": object_ids}})
     if result.deleted_count > 0:
-        return {"message": f"Deleted {result.deleted_count} news items successfully"}
+        return {"status": "success", "message": f"Deleted {result.deleted_count} news items successfully"}
     else:
         raise HTTPException(status_code=404, detail="No news items found to delete")
