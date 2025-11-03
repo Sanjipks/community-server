@@ -14,7 +14,7 @@ async def post_joke(joke: postJoke):
     category_dict = joke.model_dump()
     result = await db["postJoke"].insert_one(category_dict)
     if result.inserted_id:
-        return {"message": "joke posted Successfully"}
+        return {"message": "joke posted Successfully", "status": "success", "id": str(result.inserted_id)}
     else:
         raise HTTPException(status_code=500, detail="Failed to post jokes")
 
