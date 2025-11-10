@@ -6,16 +6,18 @@ from app.models import postCommunityPost
 router = APIRouter()
 
 @router.get("/community-posts")
-async def get_community_posts():
+async def get_community_posts(start: int, end: int):
     try:
         db = await get_database()
-        posts = await db["communityPost"].find().to_list(length=100)
+        limit = end - start
+        posts = await db["communityPost"].find().skip(start).limit(limit).to_list(length=limit)
         for post in posts:
-            post["id"] = str(post["_id"])
-            del post["_id"]
+           post["id"] = str(post["_id"])
+        del post["_id"]
         return posts if posts else {"message": "No posts found"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching posts: {str(e)}")
+
 
 @router.post("/post-community-post")
 async def post_community_post(post: postCommunityPost):
