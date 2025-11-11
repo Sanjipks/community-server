@@ -19,9 +19,10 @@ async def post_joke(joke: postJoke):
         raise HTTPException(status_code=500, detail="Failed to post jokes")
 
 @router.get("/posted-jokes")
-async def posted_jokes():
+async def posted_jokes(start: int = 0, end: int = 100):
     db = await get_database()
-    postedJokes = await db["postJoke"].find().to_list(length=100)
+    limit = end - start
+    postedJokes = await db["postJoke"].find().skip(start).limit(limit).to_list(length=limit)
     for joke in postedJokes:
         joke["id"] = str(joke["_id"])
         del joke["_id"]
