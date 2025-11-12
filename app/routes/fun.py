@@ -22,6 +22,7 @@ async def post_joke(joke: postJoke):
 async def posted_jokes(start: int = 0, end: int = 100):
     db = await get_database()
     limit = end - start
+    print ('limit:', limit)
     postedJokes = await db["postJoke"].find().skip(start).limit(limit).to_list(length=limit)
     for joke in postedJokes:
         joke["id"] = str(joke["_id"])
