@@ -5,8 +5,9 @@ from app.models import postCommunityPost
 
 router = APIRouter()
 
-@router.get("/community-posts")
-async def get_community_posts(start: int = 0, end: int = 50):
+@router.get("/community-posts/start={start}&end={end}")
+async def get_community_posts(start: int, end: int):
+    print('Fetching community posts from', start, 'to', end)
     # will work for pagination
     try:
         db = await get_database()
