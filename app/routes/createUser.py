@@ -22,7 +22,7 @@ async def generate_authcode(user: createUser):
 
     authcode = gen_code(8)  # e.g., 8-char code like "7X2K9PQA"
     now = datetime.now(timezone.utc)
-
+    print('Generated authcode:', authcode)
     await db["authCodesForRegistration"].insert_one({
         "email": user.email,
         "authcode": authcode,
