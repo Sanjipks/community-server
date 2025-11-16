@@ -2,41 +2,62 @@ from app.database import get_database
 from fastapi import APIRouter, HTTPException
 from datetime import datetime, timedelta, timezone
 from app.utilityFunctions.sendEmail import send_authcode_via_email 
+from app.models import LoginUser
 import uuid
 
-router = APIRouter()
-@router.get("/generate-authcode")
-async def login_user(useremail: str, userpassword: str):
-    db = await get_database()
-    user = await db["users"].find_one({"email": useremail, "password": userpassword})
-    
-    if user:
-        authcode = str(uuid.uuid4())
-        print(f"Generated authCode: {authcode}")
 
-        await db["authCodesForLogin"].insert_one({
-            "email": useremail,
-            "authCode": authcode,
-            "createdAt": datetime.now(timezone.utc)
-        })
+
+router = APIRouter()
+
+@router.post("/generate-authcode")
+async def generate_authcode(body: LoginUser):
     try:
-            send_authcode_via_email(useremail, authcode)
+        db = await get_database()
+
+        user = await db["users"].find_one({
+            "email": body.useremail,
+            "password": body.userpassword
+        })
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid email or password")
+
+        # create auth code (valid for 10 minutes)
+        authcode = uuid.uuid4().hex
+        now = datetime.now(timezone.utc)
+        record = {
+            "email": body.useremail,
+            "authCode": authcode,
+            "createdAt": now,
+            "expiresAt": now + timedelta(minutes=10),
+            "used": False
+        }
+
+        inserted = await db["authCodesForLogin"].insert_one(record)
+        if not inserted.inserted_id:
+            raise HTTPException(status_code=500, detail="Failed to store auth code")
+
+        # try sending email, but still return a usable code if email fails
+        try:
+            send_authcode_via_email(body.useremail, authcode)  # assume sync; if async, await it
             return {
                 "status": "success",
-                "message": "Please check your email for the authcode, your authcode will expire in 10 minutes",
-                "authcode": authcode 
+                "message": "Please check your email for the auth code. It expires in 10 minutes.",
             }
-    except Exception as email_error:
-            print(f"Warning: Failed to send email: {str(email_error)}")
-            # Return authcode in response since email failed
+        except Exception as email_error:
+            # log and still return the code so user can proceed
+            # some codeswill be removed after successful login implementation
+            print(f"Warning: Failed to send email: {email_error}")
             return {
                 "status": "warning",
-                "message": "Auth code generated but email delivery failed. Please use the code from the response.",
+                "message": "Auth code generated but email delivery failed. Use the code shown here; it expires in 10 minutes.",
                 "authcode": authcode
             }
 
+    except HTTPException:
+        raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error generating authcode: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error generating auth code: {e}")
+
     
 
 @router.post("/verify-authcode")

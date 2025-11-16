@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from app.database import get_database
 from datetime import datetime, timedelta, timezone
 from app.models import createUser, VerifyAuthBody
+from app.utilityFunctions.sendEmail import send_authcode_via_email
 import secrets, string  # more appropriate than uuid for short auth codes
 
 
@@ -23,6 +24,8 @@ async def generate_authcode(user: createUser):
     authcode = gen_code(8)  # e.g., 8-char code like "7X2K9PQA"
     now = datetime.now(timezone.utc)
     print('Generated authcode:', authcode)
+
+
     await db["authCodesForRegistration"].insert_one({
         "email": user.email,
         "authcode": authcode,
@@ -30,7 +33,6 @@ async def generate_authcode(user: createUser):
     })
 
     try:
-        from app.utilityFunctions.sendEmail import send_authcode_via_email
         send_authcode_via_email(user.email, authcode)
         return {
             "status": "success",
@@ -78,7 +80,7 @@ async def verify_authcode(payload: VerifyAuthBody):
     code = payload.authCodeRegister
     user = payload.newUser
 
-    # Cutoff time handled IN Mongo (no Python-side naive/aware comparison)
+    # cutoff time handled IN Mongo (no Python-side naive/aware comparison)
     cutoff = datetime.now(timezone.utc) - timedelta(minutes=10)
 
     # Atomically verify AND consume the code (race-safe)
@@ -89,21 +91,21 @@ async def verify_authcode(payload: VerifyAuthBody):
     })
 
     if not entry:
-        # Distinguish between "expired" and "invalid"
+        # distinguish between "expired" and "invalid"
         exists = await db["authCodesForRegistration"].find_one({
             "email": user.email,
             "authcode": code
         })
         if exists:
-            # Optionally delete expired code to keep the collection clean
+            # optionally delete expired code to keep the collection clean
             await db["authCodesForRegistration"].delete_one({"_id": exists["_id"]})
             raise HTTPException(status_code=400, detail="Auth code has expired")
         raise HTTPException(status_code=400, detail="Invalid auth code")
 
-    # Create the user (you may also want a unique index on users.email)
+    # create the user (you may also want a unique index on users.email)
     result = await db["users"].insert_one(user.model_dump())
     if not result.inserted_id:
-        # Extremely rare; re-throw as server error
+        # extremely rare; re-throw as server error
         raise HTTPException(status_code=500, detail="Failed to create user")
 
     return {"message": "User created successfully", "id": str(result.inserted_id)}
