@@ -1,8 +1,8 @@
-from jose import JWTError, jwt
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from bson import ObjectId
 from app.database import get_database
+
 
 SECRET = "SECRET"
 ALGO = "HS256"
