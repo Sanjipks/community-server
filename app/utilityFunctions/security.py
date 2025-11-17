@@ -1,9 +1,12 @@
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from app.database import get_database
+from datetime import datetime, timedelta, timezone
 import jwt
 from jwt import InvalidTokenError
 from bson import ObjectId
+
+
 
 SECRET = "SECRET"
 ALGO = "HS256"
@@ -26,3 +29,10 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         raise HTTPException(status_code=404, detail="User not found")
 
     return user
+
+
+def create_access_token(data: dict, expires_delta: timedelta):
+    to_encode = data.copy()
+    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=15))
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, SECRET, algorithm=ALGO)
