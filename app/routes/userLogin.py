@@ -1,26 +1,14 @@
 from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-from bson import ObjectId
 from app.database import get_database
 from app.models import LoginUser, VerifyAuthCodeBody
 from app.utilityFunctions.sendEmail import send_authcode_via_email
+from app.utilityFunctions.security import create_access_token
 import uuid
-import jwt
 
 router = APIRouter()
 
-SECRET = "SECRET"
-ALGO = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
-
-
-def create_access_token(data: dict, expires_delta: timedelta | None = None):
-    to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=15))
-    to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, SECRET, algorithm=ALGO)
-
 
 @router.post("/generate-authcode")
 async def generate_authcode(body: LoginUser):
@@ -68,11 +56,6 @@ async def generate_authcode(body: LoginUser):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating auth code: {e}")
 
-
-
-
-
-
 @router.post("/verify-authcode")
 async def verify_authcode(body: VerifyAuthCodeBody):
     try:
@@ -103,7 +86,6 @@ async def verify_authcode(body: VerifyAuthCodeBody):
         user = await db["users"].find_one({"email": body.useremail})
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
-
         # create JWT token for this user
         access_token = create_access_token(
             data={"sub": str(user["_id"])},
