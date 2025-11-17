@@ -1,13 +1,26 @@
-from app.database import get_database
-from fastapi import APIRouter, HTTPException
 from datetime import datetime, timedelta, timezone
-from app.utilityFunctions.sendEmail import send_authcode_via_email 
-from app.models import LoginUser
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+from bson import ObjectId
+from app.database import get_database
+from app.models import LoginUser, VerifyAuthCodeBody
+from app.utilityFunctions.sendEmail import send_authcode_via_email
 import uuid
-
-
+import jwt
 
 router = APIRouter()
+
+SECRET = "SECRET"
+ALGO = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+
+def create_access_token(data: dict, expires_delta: timedelta | None = None):
+    to_encode = data.copy()
+    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=15))
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, SECRET, algorithm=ALGO)
+
 
 @router.post("/generate-authcode")
 async def generate_authcode(body: LoginUser):
@@ -29,28 +42,25 @@ async def generate_authcode(body: LoginUser):
             "authCode": authcode,
             "createdAt": now,
             "expiresAt": now + timedelta(minutes=10),
-            "used": False
+            "used": False,
         }
 
         inserted = await db["authCodesForLogin"].insert_one(record)
         if not inserted.inserted_id:
             raise HTTPException(status_code=500, detail="Failed to store auth code")
 
-        # try sending email, but still return a usable code if email fails
         try:
-            send_authcode_via_email(body.useremail, authcode)  # assume sync; if async, await it
+            send_authcode_via_email(body.useremail, authcode)
             return {
                 "status": "success",
                 "message": "Please check your email for the auth code. It expires in 10 minutes.",
             }
         except Exception as email_error:
-            # log and still return the code so user can proceed
-            # some codeswill be removed after successful login implementation
             print(f"Warning: Failed to send email: {email_error}")
             return {
                 "status": "warning",
                 "message": "Auth code generated but email delivery failed. Use the code shown here; it expires in 10 minutes.",
-                "authcode": authcode
+                "authcode": authcode,
             }
 
     except HTTPException:
@@ -58,31 +68,55 @@ async def generate_authcode(body: LoginUser):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating auth code: {e}")
 
-    
+
+
+
+
 
 @router.post("/verify-authcode")
-async def verify_authcode(useremail: str, authcode: str):
+async def verify_authcode(body: VerifyAuthCodeBody):
     try:
         db = await get_database()
 
-        # Check if the authcode matches
-        authcode_entry = await db["authCodesForLogin"].find_one({"user": useremail, "authcode": authcode})
+        # match the same field names you used in insert
+        authcode_entry = await db["authCodesForLogin"].find_one({
+            "email": body.useremail,
+            "authCode": body.authcode,
+            "used": False,
+        })
+
         if not authcode_entry:
-            raise HTTPException(status_code=400, detail="Invalid authcode")
+            raise HTTPException(status_code=400, detail="Invalid auth code")
 
-        # Check if the authcode has expired (10-minute limit)
-        created_at = authcode_entry.get("createdAt")
-        if not created_at or datetime.now(timezone.utc) > created_at + timedelta(minutes=10):
-            raise HTTPException(status_code=400, detail="Authcode has expired")
+        # check expiration (use expiresAt if present)
+        expires_at = authcode_entry.get("expiresAt")
+        if not expires_at or datetime.now(timezone.utc) > expires_at:
+            raise HTTPException(status_code=400, detail="Auth code has expired")
 
-        # Remove the authcode from the database (optional)
-        await db["authCodesForLogin"].delete_one({"user": useremail, "authcode": authcode})
+        # mark authcode as used (so it can't be reused)
+        await db["authCodesForLogin"].update_one(
+            {"_id": authcode_entry["_id"]},
+            {"$set": {"used": True, "usedAt": datetime.now(timezone.utc)}},
+        )
 
-        # Finalize user login
-     
-        if authcode_entry:
-            return {"message": "User logged in successfully", }
-        else:
-            raise HTTPException(status_code=500, detail="Failed to create user")
+        # load user
+        user = await db["users"].find_one({"email": body.useremail})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        # create JWT token for this user
+        access_token = create_access_token(
+            data={"sub": str(user["_id"])},
+            expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
+        )
+
+        return {
+            "message": "User logged in successfully",
+            "access_token": access_token,
+            "token_type": "bearer",
+        }
+
+    except HTTPException:
+        raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error verifying authcode: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error verifying auth code: {str(e)}")
