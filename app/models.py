@@ -57,9 +57,14 @@ class VerifyAuthBody(BaseModel):
     authCodeRegister: str
     newUser: createUser  
 
+#user login model
 class LoginUser(BaseModel):
     useremail: EmailStr
     userpassword: str
+
+class VerifyAuthCodeBody(BaseModel):
+    useremail: str
+    authcode: str
 
 class ResetPasswordBody(BaseModel):
     useremail: EmailStr
