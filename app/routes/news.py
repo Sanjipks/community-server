@@ -1,11 +1,13 @@
 from datetime import datetime, timezone
-from fastapi import APIRouter, Form, File, UploadFile, HTTPException
+from fastapi import APIRouter, UploadFile, HTTPException, Form, File, Depends
+from app.utilityFunctions.security import get_current_user
 from pathlib import Path
 from app.database import get_database
 from app.models import BulkDeleteBody
 from bson import ObjectId
 from dotenv import load_dotenv
 import os
+
 
 load_dotenv()
 
@@ -85,16 +87,31 @@ async def add_news(
 
 
 @router.delete("/allnews/{id}")
-async def delete_news(id: str):
+async def delete_news(
+    id: str,
+    current_user = Depends(get_current_user),
+):
     db = await get_database()
+
     try:
         object_id = ObjectId(id)
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid news ID format")
 
+    news = await db["community-news"].find_one({"_id": object_id})
+    if not news:
+        raise HTTPException(status_code=404, detail="News not found")
+
+    # Example: news["authorId"] stores user _id as string
+    is_admin = current_user.get("role") == "admin"
+    is_owner = str(current_user["_id"]) == str(news.get("authorId"))
+
+    if not (is_admin or is_owner):
+        raise HTTPException(status_code=403, detail="Not allowed to delete this news")
+
     result = await db["community-news"].delete_one({"_id": object_id})
     if result.deleted_count == 1:
-        return {"status":"success", "message": "News deleted successfully"}
+        return {"status": "success", "message": "News deleted successfully"}
     else:
         raise HTTPException(status_code=404, detail="News not found")
 

@@ -1,16 +1,14 @@
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
+from bson import ObjectId
 from app.database import get_database
-from datetime import datetime, timedelta, timezone
 import jwt
 from jwt import InvalidTokenError
-from bson import ObjectId
-
-
 
 SECRET = "SECRET"
 ALGO = "HS256"
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+
 
 async def get_current_user(token: str = Depends(oauth2_scheme)):
     try:
@@ -31,8 +29,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     return user
 
 
-def create_access_token(data: dict, expires_delta: timedelta):
-    to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=15))
-    to_encode.update({"exp": expire})
-    return jwt.encode(to_encode, SECRET, algorithm=ALGO)
+async def require_admin(user = Depends(get_current_user)):
+    if user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admins only")
+    return user
