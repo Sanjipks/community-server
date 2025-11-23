@@ -13,13 +13,14 @@ async def get_community_posts(start: int, end: int):
         db = await get_database()
         limit = end - start
         print ('limit:', limit)
+        total_posts = await db["communityPost"].count_documents({})
         posts = await db["communityPost"].find().skip(start).limit(limit).to_list(length=limit)
 
         for post in posts:
             post["id"] = str(post["_id"])
             del post["_id"]
 
-        return posts if posts else {"message": "No posts found"}
+        return {"selectedPosts": posts, "totalPosts": total_posts} if posts else {"message": "No posts found"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching posts: {str(e)}")
 
