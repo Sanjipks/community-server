@@ -7,12 +7,10 @@ router = APIRouter()
 
 @router.get("/community-posts/start={start}&end={end}")
 async def get_community_posts(start: int, end: int):
-    print('Fetching community posts from', start, 'to', end)
-    # will work for pagination
     try:
         db = await get_database()
         limit = end - start
-        print ('limit:', limit)
+       
         total_posts = await db["communityPost"].count_documents({})
         posts = await db["communityPost"].find().skip(start).limit(limit).to_list(length=limit)
 
@@ -42,7 +40,7 @@ async def post_community_post(post: postCommunityPost):
 async def delete_posted_category(request: postCommunityPost):
     try:
         db = await get_database()
-        object_id = ObjectId(request.id)  # Convert the string id to ObjectId
+        object_id = ObjectId(request.id)  
         result = await db["communityPost"].delete_one({"_id": object_id})
         if result.deleted_count == 1:
             return {"message": "Category deleted successfully"}
