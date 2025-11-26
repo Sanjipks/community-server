@@ -180,3 +180,9 @@ class  NewsItem (BaseModel):
   author: str
   postedDate: str
   link: str
+
+class postMessage(BaseModel):
+    sender: str
+    receiver: str
+    message: str
+    timestamp: str
