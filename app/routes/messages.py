@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from app.database import get_database
 from app.models import postMessage
+from bson import ObjectId
 
 router = APIRouter()
 
@@ -22,3 +23,18 @@ async def get_messages():
         msg["id"] = str(msg["_id"])
         del msg["_id"]
     return messages 
+
+@router.delete('/messages/{id}')
+async def delete_message(id: str):
+    db = await get_database()  
+    try:
+        object_id = ObjectId(id)
+    except Exception as e:
+        print("Error occurred:", str(e))
+        raise HTTPException(status_code=400, detail="Invalid message ID format")
+
+    result = await db["messages"].delete_one({"_id": object_id})
+    if result.deleted_count == 1:
+        return {"message": "Message deleted successfully", "status": "success"}
+    else:
+        raise HTTPException(status_code=404, detail="Message not found")
