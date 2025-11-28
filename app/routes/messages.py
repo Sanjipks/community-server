@@ -8,7 +8,10 @@ router = APIRouter()
 @router.post('/message')
 async def post_message(message: postMessage):
     db = await get_database()
-    message_dict = {"content": "Hello, World!"}
+    message_dict = {'sender': message.sender,
+                    'receiver': message.receiver,
+                    'message': message.message,
+                    'timestamp': message.timestamp}
     result = await db["messages"].insert_one(message_dict)
     if result.inserted_id: 
         return {"message": "Message posted Successfully", "status": "success", "id": str(result.inserted_id)}
