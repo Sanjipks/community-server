@@ -187,7 +187,7 @@ class postMessage(BaseModel):
     message: str
     timestamp: str
 
-class ContactMessageBody(BaseModel):
+class ContactUSMessageBody(BaseModel):
     name: str
     email: EmailStr
     subject: str
