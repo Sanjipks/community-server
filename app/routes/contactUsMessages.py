@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, EmailStr
-from datetime import datetime
+from datetime import datetime, timezone
 from app.database import get_database
 
 router = APIRouter()
@@ -15,7 +15,7 @@ class ContactMessageBody(BaseModel):
 @router.post("/contact-us-message")
 async def create_contact_message(contactMessage: ContactMessageBody):
     db = await get_database()
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
 
     doc = {
         "name": contactMessage.name,
