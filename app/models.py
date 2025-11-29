@@ -186,3 +186,10 @@ class postMessage(BaseModel):
     receiver: str
     message: str
     timestamp: str
+
+class ContactMessageBody(BaseModel):
+    name: str
+    email: EmailStr
+    subject: str
+    message: str
+    userId: str | None = None
