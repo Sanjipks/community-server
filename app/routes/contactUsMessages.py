@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, EmailStr
 from datetime import datetime, timezone
 from app.database import get_database
@@ -30,6 +30,8 @@ async def create_contact_message(contactMessage: ContactMessageBody):
     }
 
     result = await db["contactMessages"].insert_one(doc)
-    doc["id"] = str(result.inserted_id)
+    
+    if not result.inserted_id:
+        raise HTTPException(status_code=500, detail="Failed to create news entry")
     del doc["_id"]
-    return doc
+    return {"message": "Message sent successfully"}
