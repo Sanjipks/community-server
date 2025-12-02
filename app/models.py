@@ -192,4 +192,4 @@ class ContactUSMessageBody(BaseModel):
     email: EmailStr
     subject: str
     message: str
-    userId: str | None = None
+    userId: str 
