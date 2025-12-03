@@ -35,3 +35,16 @@ async def create_contact_message(contactMessage: ContactMessageBody):
         raise HTTPException(status_code=500, detail="Failed to create news entry")
     del doc["_id"]
     return {"message": "Message sent successfully"}
+
+@router.get("/contact-us-messages")
+async def get_contact_messages():   
+    db = await get_database()
+    messages = await db["contactMessages"].find().to_list(length=100)
+    for msg in messages:
+        msg["id"] = str(msg["_id"])
+        del msg["_id"]
+        if isinstance(msg["createdAt"], datetime):
+            msg["createdAt"] = msg["createdAt"].isoformat()
+        if isinstance(msg["updatedAt"], datetime):
+            msg["updatedAt"] = msg["updatedAt"].isoformat()
+    return messages

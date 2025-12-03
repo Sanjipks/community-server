@@ -12,6 +12,7 @@ from app.routes.userlist import router as userlist_router
 from app.routes.chatlist import router as chatlist_router
 from app.routes.forgot_password import router as forgotpassword_router
 from app.routes.news import router as communitynews_router
+from app.routes.contactUsMessages import router as contactusmessages_router
 from dotenv import load_dotenv
 from pathlib import Path
 
@@ -46,15 +47,18 @@ origins = [
 
 print("Routers linked successfully!")
 
+
+app.include_router(createUser_router, prefix="/create-user", tags=["Create User"])
+app.include_router(userLogin_router, prefix="/login-user", tags=["User Login"])
+app.include_router(forgotpassword_router, prefix="/forgotpassword", tags=["Forgot Password"])
 app.include_router(community_posts_router, prefix="/community", tags=["Community Posts"])
 app.include_router(communitynews_router, prefix="/communitynews", tags=["Community News"])
 app.include_router(categories_router, prefix="/categories", tags=["Categories"])
 app.include_router(fun_router, prefix="/fun", tags=["fun"])
-app.include_router(createUser_router, prefix="/create-user", tags=["Create User"])
-app.include_router(userLogin_router, prefix="/login-user", tags=["User Login"])
 app.include_router(userlist_router, prefix="/users", tags=["User Lists"])
 app.include_router(chatlist_router, prefix="/chatlist", tags=["Chatlist"])
-app.include_router(forgotpassword_router, prefix="/forgotpassword", tags=["Forgot Password"])
+app.include_router(contactusmessages_router, prefix="/messages", tags=["Contact Us Messages"])
+
 
 
 app.add_middleware(
