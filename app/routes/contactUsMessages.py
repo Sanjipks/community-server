@@ -11,7 +11,7 @@ class ContactMessageBody(BaseModel):
     email: EmailStr
     subject: str
     message: str
-    userId: str | None = None  
+    userId: str 
 
 @router.post("/contact-us-message")
 async def create_contact_message(contactMessage: ContactMessageBody):
