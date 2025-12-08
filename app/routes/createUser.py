@@ -43,6 +43,7 @@ async def generate_authcode(user: createUser):
         return {
             "status": "warning",
             "message": "Auth code generated but email delivery failed. Please request a new code or contact support.",
+            'error': email_error
         
         }
     
@@ -71,6 +72,8 @@ async def resend_authcode(user: createUser):
         return {
             "status": "warning",
             "message": "Auth code generated but email delivery failed. Please request a new code or contact support.",
+            "error": email_error
+            
         }
 
 @router.post("/verify-authcode")
@@ -108,4 +111,4 @@ async def verify_authcode(payload: VerifyAuthBody):
         # extremely rare; re-throw as server error
         raise HTTPException(status_code=500, detail="Failed to create user")
 
-    return {"message": "User created successfully", "id": str(result.inserted_id)}
+    return {"message": "User created successfully", "id": str(result.inserted_id), "status": "success"}

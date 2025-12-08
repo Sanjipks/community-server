@@ -96,6 +96,7 @@ async def verify_authcode(body: VerifyAuthCodeBody):
             "message": "User logged in successfully",
             "access_token": access_token,
             "token_type": "bearer",
+            "role": user.role
         }
 
     except HTTPException:
