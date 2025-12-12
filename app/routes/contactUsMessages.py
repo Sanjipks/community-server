@@ -13,7 +13,7 @@ class ContactMessageBody(BaseModel):
     message: str
     userId: str 
 
-@router.post("/contact-us-message")
+@router.post("/send-contact-us-message")
 async def create_contact_message(contactMessage: ContactMessageBody):
     db = await get_database()
     now = datetime.now(timezone.utc)
@@ -37,7 +37,8 @@ async def create_contact_message(contactMessage: ContactMessageBody):
     del doc["_id"]
     return {"message": "Message sent successfully"}
 
-@router.get("/contact-us-messages")
+
+@router.get("/all-contact-us-messages")
 async def get_contact_messages():   
     db = await get_database()
     messages = await db["contactMessages"].find().to_list(length=100)
