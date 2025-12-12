@@ -60,7 +60,6 @@ app.include_router(chatlist_router, prefix="/chatlist", tags=["Chatlist"])
 app.include_router(contactusmessages_router, prefix="/messages", tags=["Contact Us Messages"])
 
 
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
