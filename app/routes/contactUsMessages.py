@@ -3,18 +3,12 @@ from pydantic import BaseModel, EmailStr
 from datetime import datetime, timezone
 from app.database import get_database
 from bson import ObjectId
-
+from app.models import ContactUSMessageBody
 router = APIRouter()
 
-class ContactMessageBody(BaseModel):
-    name: str
-    email: EmailStr
-    subject: str
-    message: str
-    userId: str 
 
 @router.post("/send-contact-us-message")
-async def create_contact_message(contactMessage: ContactMessageBody):
+async def create_contact_message(contactMessage: ContactUSMessageBody):
     db = await get_database()
     now = datetime.now(timezone.utc)
 
