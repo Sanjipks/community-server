@@ -1,34 +1,53 @@
 from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel, EmailStr
+from datetime import datetime, timezone
 from app.database import get_database
-from app.models import postMessage
 from bson import ObjectId
-
+from app.models import ContactUSMessageBody
 router = APIRouter()
 
-@router.post('/message')
-async def post_message(message: postMessage):
+
+@router.post("/send-message")
+async def create_contact_message(contactMessage: ContactUSMessageBody):
     db = await get_database()
-    message_dict = {'sender': message.sender,
-                    'receiver': message.receiver,
-                    'message': message.message,
-                    'timestamp': message.timestamp}
-    result = await db["messages"].insert_one(message_dict)
-    if result.inserted_id: 
-        return {"message": "Message posted Successfully", "status": "success", "id": str(result.inserted_id)}
-    else:
-        raise HTTPException(status_code=500, detail="Failed to post message")
+    now = datetime.now(timezone.utc)
+
+    doc = {
+        "name": contactMessage.name,
+        "email": contactMessage.email,
+        "subject": contactMessage.subject,
+        "message": contactMessage.message,
+        "userId": contactMessage.userId,
+        "status": "new",
+        "createdAt": now,
+        "updatedAt": now,
+        "assignedTo": None,
+    }
+
+    result = await db["contactMessages"].insert_one(doc)
     
-@router.get('/messages')
-async def get_messages():
+    if not result.inserted_id:
+        raise HTTPException(status_code=500, detail="Failed to create news entry")
+    del doc["_id"]
+    return {"message": "Message sent successfully"}
+
+
+@router.get("/allMessages/{userId}")
+async def get_contact_messages():   
     db = await get_database()
-    messages = await db["messages"].find().to_list(length=100)
+    messages = await db["contactMessages"].find().to_list(length=100)
     for msg in messages:
         msg["id"] = str(msg["_id"])
         del msg["_id"]
-    return messages 
+        if isinstance(msg["createdAt"], datetime):
+            msg["createdAt"] = msg["createdAt"].isoformat()
+        if isinstance(msg["updatedAt"], datetime):
+            msg["updatedAt"] = msg["updatedAt"].isoformat()
+    return messages
 
-@router.delete('/messages/{id}')
-async def delete_message(id: str):
+
+@router.delete("/messages/{id}")
+async def delete_contact_message(id: str):
     db = await get_database()  
     try:
         object_id = ObjectId(id)
@@ -36,7 +55,7 @@ async def delete_message(id: str):
         print("Error occurred:", str(e))
         raise HTTPException(status_code=400, detail="Invalid message ID format")
 
-    result = await db["messages"].delete_one({"_id": object_id})
+    result = await db["contactMessages"].delete_one({"_id": object_id})
     if result.deleted_count == 1:
         return {"message": "Message deleted successfully", "status": "success"}
     else:
