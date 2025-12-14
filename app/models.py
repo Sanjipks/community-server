@@ -182,10 +182,9 @@ class  NewsItem (BaseModel):
   link: str
 
 class postMessage(BaseModel):
-    sender: str
-    receiver: str
+    senderName: str
+    senderEmail: str
     message: str
-    timestamp: str
 
 class ContactUSMessageBody(BaseModel):
     name: str
