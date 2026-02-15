@@ -3,15 +3,12 @@ from app.database import get_database
 from datetime import datetime, timedelta, timezone
 from app.models import createUser, VerifyAuthBody
 from app.utilityFunctions.sendEmail import send_authcode_via_email
-import secrets, string  # more appropriate than uuid for short auth codes
+from app.utilityFunctions.codeGenerator import gen_code
 
 
 router = APIRouter()
 
-# Helper to generate an 8-char, high-entropy code (A-Z, 0-9)
-def gen_code(length: int = 8) -> str:
-    alphabet = string.ascii_uppercase + string.digits
-    return "".join(secrets.choice(alphabet) for _ in range(length))
+
 
 @router.post("/generate-authcode")
 async def generate_authcode(user: createUser):

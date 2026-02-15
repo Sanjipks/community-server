@@ -4,6 +4,8 @@ from app.database import get_database
 from app.models import LoginUser, VerifyAuthCodeBody
 from app.utilityFunctions.sendEmail import send_authcode_via_email
 from app.utilityFunctions.security import create_access_token
+from app.utilityFunctions.codeGenerator import gen_code
+from bcrypt import checkpw
 import uuid
 
 router = APIRouter()
@@ -15,15 +17,17 @@ async def generate_authcode(body: LoginUser):
     try:
         db = await get_database()
 
-        user = await db["users"].find_one({
-            "email": body.useremail,
-            "password": body.userpassword
-        })
-        if not user:
-            raise HTTPException(status_code=401, detail="Invalid email or password")
+        user = await db["users"].find_one({"email": body.useremail})
+
+        if not user or not checkpw(
+            body.userpassword.encode("utf-8"),
+            user["password"].encode("utf-8")
+):
+            raise HTTPException(status_code = 401,  detail= "Invalid credentials")
 
         # create auth code (valid for 10 minutes)
-        authcode = uuid.uuid4().hex
+        authcode = gen_code(8)
+        print (authcode, 'authcode')
         now = datetime.now(timezone.utc)
         record = {
             "email": body.useremail,
@@ -34,6 +38,7 @@ async def generate_authcode(body: LoginUser):
         }
 
         inserted = await db["authCodesForLogin"].insert_one(record)
+      
         if not inserted.inserted_id:
             raise HTTPException(status_code=500, detail="Failed to store auth code")
 
