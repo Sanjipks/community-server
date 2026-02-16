@@ -77,9 +77,7 @@ async def verify_authcode(body: VerifyAuthCodeBody):
 
         # check expiration (use expiresAt if present)
         expires_at = authcode_entry.get("expiresAt")
-        # if not expires_at or datetime.now(timezone.utc) > expires_at:
-        #     raise HTTPException(status_code=400, detail="Auth code has expired")
-
+      
         if not expires_at:
           raise HTTPException(status_code=400, detail="Auth code has expired")
 
