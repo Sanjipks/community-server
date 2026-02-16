@@ -6,7 +6,6 @@ from app.utilityFunctions.sendEmail import send_authcode_via_email
 from app.utilityFunctions.security import create_access_token
 from app.utilityFunctions.codeGenerator import gen_code
 from bcrypt import checkpw
-import uuid
 
 router = APIRouter()
 
@@ -21,8 +20,7 @@ async def generate_authcode(body: LoginUser):
 
         if not user or not checkpw(
             body.userpassword.encode("utf-8"),
-            user["password"].encode("utf-8")
-):
+            user["password"].encode("utf-8")):
             raise HTTPException(status_code = 401,  detail= "Invalid credentials")
 
         # create auth code (valid for 10 minutes)
@@ -63,9 +61,10 @@ async def generate_authcode(body: LoginUser):
 
 @router.post("/verify-authcode")
 async def verify_authcode(body: VerifyAuthCodeBody):
+    print ('body', body.authcode, 'user', body.useremail)
     try:
         db = await get_database()
-
+        
         # match the same field names you used in insert
         authcode_entry = await db["authCodesForLogin"].find_one({
             "email": body.useremail,
@@ -78,8 +77,18 @@ async def verify_authcode(body: VerifyAuthCodeBody):
 
         # check expiration (use expiresAt if present)
         expires_at = authcode_entry.get("expiresAt")
-        if not expires_at or datetime.now(timezone.utc) > expires_at:
-            raise HTTPException(status_code=400, detail="Auth code has expired")
+        # if not expires_at or datetime.now(timezone.utc) > expires_at:
+        #     raise HTTPException(status_code=400, detail="Auth code has expired")
+
+        if not expires_at:
+          raise HTTPException(status_code=400, detail="Auth code has expired")
+
+        # Mongo may return naive datetime; treat it as UTC
+        if isinstance(expires_at, datetime) and expires_at.tzinfo is None:
+            expires_at = expires_at.replace(tzinfo=timezone.utc)
+
+        if datetime.now(timezone.utc) > expires_at:
+             raise HTTPException(status_code=400, detail="Auth code has expired")
 
         # mark authcode as used (so it can't be reused)
         await db["authCodesForLogin"].update_one(
@@ -87,8 +96,11 @@ async def verify_authcode(body: VerifyAuthCodeBody):
             {"$set": {"used": True, "usedAt": datetime.now(timezone.utc)}},
         )
 
+        
+
         # load user
-        user = await db["users"].find_one({"email": body.useremail})
+        user = await db["users"].find_one({"email": body.useremail}) 
+       
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         # create JWT token for this user
@@ -98,10 +110,11 @@ async def verify_authcode(body: VerifyAuthCodeBody):
         )
 
         return {
+            "status": "success",
             "message": "User logged in successfully",
             "access_token": access_token,
             "token_type": "bearer",
-            "role": user.role
+            "role": user.get("role")
         }
 
     except HTTPException:
