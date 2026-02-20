@@ -1,5 +1,4 @@
 from email.message import EmailMessage
-from email.utils import make_msgid
 import smtplib
 from dotenv import load_dotenv
 import os
