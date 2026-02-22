@@ -15,10 +15,24 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 def create_access_token(data: dict, expires_delta: timedelta):
     to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=15))
+    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=30))
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET, algorithm=ALGO)
 
+def create_refresh_token(data: dict, expires_delta: timedelta):
+    to_encode = data.copy()
+    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(days=7))
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, SECRET, algorithm=ALGO)
+
+def verify_token(token: str, expected_type: str):
+    try:
+        payload = jwt.decode(token, SECRET, algorithms=[ALGO])
+        if payload.get("type") != expected_type:
+            raise ValueError("Wrong token type")
+        return payload
+    except InvalidTokenError:
+        return None
 
 async def get_current_user(token: str = Depends(oauth2_scheme)):
     try:

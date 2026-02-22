@@ -1,15 +1,20 @@
 from datetime import datetime, timedelta, timezone
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request, Response
 from app.database import get_database
 from app.models import LoginUser, VerifyAuthCodeBody
 from app.utilityFunctions.sendEmail import send_authcode_via_email
-from app.utilityFunctions.security import create_access_token
+from app.utilityFunctions.security import create_access_token, create_refresh_token, verify_token
 from app.utilityFunctions.codeGenerator import gen_code
 from bcrypt import checkpw
+from bson import ObjectId
 
 router = APIRouter()
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
+REFRESH_TOKEN_EXPIRE_DAYS = 7
+COOKIE_NAME = "refresh_token"
+
+# Login:
 
 @router.post("/generate-authcode")
 async def generate_authcode(body: LoginUser):
@@ -60,8 +65,7 @@ async def generate_authcode(body: LoginUser):
         raise HTTPException(status_code=500, detail=f"Error generating auth code: {e}")
 
 @router.post("/verify-authcode")
-async def verify_authcode(body: VerifyAuthCodeBody):
-    print ('body', body.authcode, 'user', body.useremail)
+async def verify_authcode(body: VerifyAuthCodeBody, response: Response):
     try:
         db = await get_database()
         
@@ -92,30 +96,86 @@ async def verify_authcode(body: VerifyAuthCodeBody):
         await db["authCodesForLogin"].update_one(
             {"_id": authcode_entry["_id"]},
             {"$set": {"used": True, "usedAt": datetime.now(timezone.utc)}},
-        )
-
-        
+        )    
 
         # load user
         user = await db["users"].find_one({"email": body.useremail}) 
        
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
+        
+        user_id = str(user["_id"])
+        role = user.get("role", "user")
+
         # create JWT token for this user
         access_token = create_access_token(
-            data={"sub": str(user["_id"])},
+            data={"sub": user_id, "role": role},
             expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
         )
+        refresh_token = create_refresh_token(
+        data={"sub": user_id},
+        expires_delta=timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS),
+    )
+        response.set_cookie(
+        key=COOKIE_NAME,
+        value=refresh_token,
+        httponly=True,
+        secure=False,     # True in production (HTTPS)
+        samesite="lax",   # if cross-site: "none" + secure=True
+        max_age=60 * 60 * 24 * REFRESH_TOKEN_EXPIRE_DAYS,
+        path="/",
+    )
 
         return {
             "status": "success",
             "message": "User logged in successfully",
             "access_token": access_token,
             "token_type": "bearer",
-            "role": user.get("role")
+            "user": {"email": user.get("email"), "role": role},
         }
 
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error verifying auth code: {str(e)}")
+    
+
+# Login Refresh 
+
+@router.post("/refresh-login")
+async def refresh(request: Request):
+    db = await get_database()
+
+    refresh_token = request.cookies.get(COOKIE_NAME)
+    if not refresh_token:
+        raise HTTPException(status_code=401, detail="Missing refresh token")
+
+    payload = verify_token(refresh_token, expected_type="refresh")
+    if not payload:
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
+
+    user_id = payload.get("sub")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
+
+    user = await db["users"].find_one({"_id": ObjectId(user_id)})
+    if not user:
+        raise HTTPException(status_code=401, detail="User not found")
+
+    role = user.get("role", "user")
+
+    new_access_token = create_access_token(
+        data={"sub": user_id, "role": role},
+        expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
+    )
+
+    return {
+        "access_token": new_access_token,
+        "token_type": "bearer",
+        "user": {"email": user.get("email"), "role": role},
+    }
+
+@router.post("/logout")
+async def logout(response: Response):
+    response.delete_cookie(key=COOKIE_NAME, path="/")
+    return {"message": "User Logged out"}
