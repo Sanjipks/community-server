@@ -16,7 +16,7 @@ COOKIE_NAME = "refresh_token"
 
 # Login:
 
-@router.post("/generate-authcode")
+@router.post("/login-generate-authcode")
 async def generate_authcode(body: LoginUser):
     try:
         db = await get_database()
@@ -64,7 +64,7 @@ async def generate_authcode(body: LoginUser):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating auth code: {e}")
 
-@router.post("/verify-authcode")
+@router.post("/login-verify-authcode")
 async def verify_authcode(body: VerifyAuthCodeBody, response: Response):
     try:
         db = await get_database()
@@ -178,4 +178,4 @@ async def refresh(request: Request):
 @router.post("/logout")
 async def logout(response: Response):
     response.delete_cookie(key=COOKIE_NAME, path="/")
-    return {"message": "User Logged out"}
+    return {"message": "You have been logged out successfully"}
