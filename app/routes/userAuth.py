@@ -146,6 +146,7 @@ async def verify_authcode(body: VerifyAuthCodeBody, response: Response):
 async def refresh(request: Request):
     db = await get_database()
 
+    print ("Refresh token request received", request.cookies.get(COOKIE_NAME))  # Debug log
     refresh_token = request.cookies.get(COOKIE_NAME)
     if not refresh_token:
         raise HTTPException(status_code=401, detail="Missing refresh token")
@@ -170,6 +171,7 @@ async def refresh(request: Request):
     )
 
     return {
+        "status": "success",
         "access_token": new_access_token,
         "token_type": "bearer",
         "user": {"email": user.get("email"), "role": role},
@@ -178,4 +180,4 @@ async def refresh(request: Request):
 @router.post("/logout")
 async def logout(response: Response):
     response.delete_cookie(key=COOKIE_NAME, path="/")
-    return {"message": "You have been logged out successfully"}
+    return {"status": "success", "message": "You have been logged out successfully"}
