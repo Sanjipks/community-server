@@ -107,6 +107,8 @@ async def verify_authcode(body: VerifyAuthCodeBody, response: Response):
         user_id = str(user["_id"])
         role = user.get("role", "user")
 
+        print (f"User {user_id} authenticated successfully with role {role}")  # Debug log
+
         # create JWT token for this user
         access_token = create_access_token(
             data={"sub": user_id, "role": role},
@@ -116,6 +118,9 @@ async def verify_authcode(body: VerifyAuthCodeBody, response: Response):
         data={"sub": user_id},
         expires_delta=timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS),
     )
+        print(f"Access token created: {access_token}")  # Debug log
+        print(f"Refresh token created: {refresh_token}")  # Debug log
+
         response.set_cookie(
         key=COOKIE_NAME,
         value=refresh_token,
@@ -152,6 +157,7 @@ async def refresh(request: Request):
         raise HTTPException(status_code=401, detail="Missing refresh token")
 
     payload = verify_token(refresh_token, expected_type="refresh")
+    print (f"Refresh token payload: {payload}")  # Debug log
     if not payload:
         raise HTTPException(status_code=401, detail="Invalid refresh token")
 
