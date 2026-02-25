@@ -28,6 +28,7 @@ def create_refresh_token(data: dict, expires_delta: timedelta):
 def verify_token(token: str, expected_type: str):
     try:
         payload = jwt.decode(token, SECRET, algorithms=[ALGO])
+        print("Decoded token payload:", payload)  # Debug log
         if payload.get("type") != expected_type:
             raise ValueError("Wrong token type")
         return payload
