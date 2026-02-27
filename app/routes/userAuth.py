@@ -151,13 +151,12 @@ async def verify_authcode(body: VerifyAuthCodeBody, response: Response):
 async def refresh(request: Request):
     db = await get_database()
 
-    print ("Refresh token request received", request.cookies.get(COOKIE_NAME))  # Debug log
     refresh_token = request.cookies.get(COOKIE_NAME)
     if not refresh_token:
         raise HTTPException(status_code=401, detail="Missing refresh token")
 
     payload = verify_token(refresh_token, expected_type="refresh")
-    print (f"Refresh token payload: {payload}")  # Debug log
+   
     if not payload:
         raise HTTPException(status_code=401, detail="Invalid refresh token")
 
