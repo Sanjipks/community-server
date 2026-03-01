@@ -23,31 +23,31 @@ def send_authcode_via_email(email: str, authcode: str):
     # HTML email content with inline styling and image reference
     html_content = f"""
    
-<html lang="en" style="margin:0; padding:0;">
+<html lang="en" style="margin:0; padding:0; ">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="x-apple-disable-message-reformatting" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Your Verification Code</title>
   </head>
-  <body style="margin:0; padding:0; background:#F2F4F7; font-family:Arial,Helvetica,sans-serif;">
+  <body style="margin:0; padding:0; font-family:Arial,Helvetica,sans-serif;">
     <!-- Preheader (hidden in most clients) -->
     <div style="display:none; max-height:0; overflow:hidden; opacity:0; color:transparent;">
       Your verification code is inside. It expires in 10 minutes.
     </div>
 
-    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#F2F4F7;">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style=" background:#0066cc; border-radius: 25px;">
       <tr>
         <td align="center" style="padding:24px 16px;">
           <!--[if mso]>
           <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600">
           <tr><td>
           <![endif]-->
-          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:600px; background:#FFFFFF; border-radius:12px; border:1px solid #EAECF0;">
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:600px; background:#990000; border-radius:12px; border:1px solid #EAECF0;">
             <!-- Header -->
             <tr>
               <td align="center" style="padding:24px 24px 8px;">
-                <img src="cid:logo_image" height="64" alt="Company logo" style="display:block; border:0; outline:none; text-decoration:none; width:64px; height:64px; border-radius:12px;" />
+                <img src="cid:logo_image" height="64" alt="Company logo" style="display:block; border:0; outline:none; text-decoration:none; background:#910707; width:78px; height:78px;" />
                 <div style="font-size:14px; color:#667085; margin-top:8px;">Secure verification</div>
               </td>
             </tr>
@@ -56,7 +56,7 @@ def send_authcode_via_email(email: str, authcode: str):
             <tr>
               <td align="left" style="padding:8px 24px 0;">
                 <h1 style="margin:0; font-size:22px; line-height:30px; color:#101828; font-weight:700;">
-                  Your Verification Code
+                  Your Verification Code:
                 </h1>
               </td>
             </tr>
@@ -140,8 +140,8 @@ def send_authcode_via_email(email: str, authcode: str):
           <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:600px;">
             <tr>
               <td align="center" style="padding:16px 8px;">
-                <p style="margin:0; font-size:12px; line-height:18px; color:#98A2B3;">
-                  ©Community Nepal. All rights reserved.
+                <p style="margin:0; font-size:12px; line-height:18px; color:#ffffff;">
+                  © 2026 NepAm Community. All rights reserved.
                 </p>
               </td>
             </tr>
