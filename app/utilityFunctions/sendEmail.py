@@ -8,7 +8,7 @@ EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 
 import smtplib
 from email.message import EmailMessage
-from email.utils import formataddr
+from email.utils import formataddr, make_msgid
 from email.mime.image import MIMEImage
 
 def send_authcode_via_email(email: str, authcode: str):
@@ -160,10 +160,10 @@ def send_authcode_via_email(email: str, authcode: str):
 
     # Attach image (make sure 'logo.png' exists in your project folder)
     try:
-        with open("images/logo.svg", "rb") as img:
-            msg.get_payload()[1].add_related(img.read(), "image", "svg", cid="logo_image")
+        with open("app/images/logo.png", "rb") as img:
+            msg.get_payload()[1].add_related(img.read(), "image", "png" "svg", cid="logo_image")
     except FileNotFoundError:
-        print("⚠️ logo.svg not found — sending email without image.")
+        print("⚠️ logo.png not found — sending email without image.")
 
     # Send via Gmail
     with smtplib.SMTP("smtp.gmail.com", 587) as server:
