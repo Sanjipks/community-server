@@ -14,11 +14,8 @@ from email.mime.image import MIMEImage
 def send_authcode_via_email(email: str, authcode: str):
     msg = EmailMessage()
     msg["Subject"] = "Your Verification Code"
-    msg["From"] = formataddr(("CommunityNepali", EMAIL_ADDRESS))
+    msg["From"] = formataddr(("NepAm Community", EMAIL_ADDRESS))
     msg["To"] = email
-
-    # logo_cid = make_msgid(domain="local")         # e.g. "<p2x9...@local>"
-    # logo_token = logo_cid[1:-1]  
 
     # HTML email content with inline styling and image reference
     html_content = f"""
@@ -36,18 +33,18 @@ def send_authcode_via_email(email: str, authcode: str):
       Your verification code is inside. It expires in 10 minutes.
     </div>
 
-    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style=" background:#0066cc; border-radius: 25px;">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="  background:#990000; border-radius: 25px;">
       <tr>
         <td align="center" style="padding:24px 16px;">
           <!--[if mso]>
           <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600">
           <tr><td>
           <![endif]-->
-          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:600px; background:#990000; border-radius:12px; border:1px solid #EAECF0;">
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:600px; background:#0066cc; border-radius:12px; border:1px solid #EAECF0;">
             <!-- Header -->
             <tr>
               <td align="center" style="padding:24px 24px 8px;">
-                <img src="cid:logo_image" height="64" alt="Company logo" style="display:block; border:0; outline:none; text-decoration:none; background:#910707; width:78px; height:78px;" />
+                <img src="cid:logo_image" height="64" alt="Company logo" style="display:block; border:0; outline:none; text-decoration:none; width:92px; height:92px;" />
                 <div style="font-size:14px; color:#667085; margin-top:8px;">Secure verification</div>
               </td>
             </tr>
