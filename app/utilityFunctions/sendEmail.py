@@ -45,14 +45,14 @@ def send_authcode_via_email(email: str, authcode: str):
             <tr>
               <td align="center" style="padding:24px 24px 8px;">
                 <img src="cid:logo_image" height="64" alt="Company logo" style="display:block; border:0; outline:none; text-decoration:none; width:92px; height:92px;" />
-                <div style="font-size:14px; color:#667085; margin-top:8px;">Secure verification</div>
+                <div style="font-size:14px; color:#ffffff; margin-top:8px;">Secure verification</div>
               </td>
             </tr>
 
             <!-- Title -->
             <tr>
               <td align="left" style="padding:8px 24px 0;">
-                <h1 style="margin:0; font-size:22px; line-height:30px; color:#101828; font-weight:700;">
+                <h1 style="margin:0; font-size:22px; line-height:30px; color:#ffffff; font-weight:700;">
                   Your Verification Code:
                 </h1>
               </td>
@@ -61,7 +61,7 @@ def send_authcode_via_email(email: str, authcode: str):
             <!-- Intro copy -->
             <tr>
               <td align="left" style="padding:8px 24px 0;">
-                <p style="margin:0; font-size:14px; line-height:22px; color:#344054;">
+                <p style="margin:0; font-size:14px; line-height:22px; color:#ffffff;">
                   Use the code below to verify your account. This code expires in <strong>10 minutes</strong>.
                 </p>
               </td>
@@ -101,9 +101,9 @@ def send_authcode_via_email(email: str, authcode: str):
                     </td>
                   </tr>
                 </table>
-                <div style="font-size:12px; color:#667085; margin-top:10px;">
+                <div style="font-size:12px; color:#ffffff; margin-top:10px;">
                   If the button doesn’t work, copy and paste this URL into your browser:<br />
-                  <span style="word-break:break-all; color:#0044cc;"></span>
+                  <span style="word-break:break-all; color:#;"></span>
                 </div>
               </td>
             </tr>
@@ -118,15 +118,15 @@ def send_authcode_via_email(email: str, authcode: str):
             <!-- Help / footer copy -->
             <tr>
               <td align="left" style="padding:0 24px 8px;">
-                <p style="margin:0; font-size:13px; line-height:20px; color:#475467;">
+                <p style="margin:0; font-size:13px; line-height:20px; color:#ffffff;">
                   Didn’t request this code? You can safely ignore this email. Your account remains secure.
                 </p>
               </td>
             </tr>
             <tr>
               <td align="left" style="padding:0 24px 24px;">
-                <p style="margin:0; font-size:13px; line-height:20px; color:#475467;">
-                  Need help? Reply to this email or visit our <a href="" style="color:#0044cc; text-decoration:none;">Help Center</a>.
+                <p style="margin:0; font-size:13px; line-height:20px; color:#ffffff;">
+                  Need help? Reply to this email or visit our <a href="" style="color:#ffffff; text-decoration:none;">Help Center</a>.
                 </p>
               </td>
             </tr>
