@@ -25,7 +25,7 @@ async def get_users_list():
     for user in users:
         user["id"] = str(user["_id"])
         del user["_id"]
-    return [{"id": user["id"], "email": user["email"]} for user in users]
+    return [{"id": user["id"], "email": user["email"], "username": user["firstName"] + " " + user["lastName"]}  for user in users]
 
 
 
