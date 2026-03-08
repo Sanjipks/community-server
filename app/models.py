@@ -130,7 +130,8 @@ class postCategory(BaseModel):
     title: str
     category: str
     description: str
-    author: str
+    author:  Optional[str] = None
+    authorName:  Optional[str] = None
     timestamp: str
 
 
