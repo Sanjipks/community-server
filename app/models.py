@@ -131,6 +131,7 @@ class postCategory(BaseModel):
     category: str
     description: str
     author: str
+    authorName: str
     timestamp: str
 
 
