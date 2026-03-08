@@ -58,3 +58,13 @@ async def require_admin(user = Depends(get_current_user)):
     if user.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Admins only")
     return user
+
+async def require_user(user = Depends(get_current_user)):
+    if user.get("role") != "user":
+        raise HTTPException(status_code=403, detail="Users only")
+    return user
+
+async def require_current_user_or_admin(user = Depends(get_current_user)):
+    if user.get("role") not in ["admin", "user"]:
+        raise HTTPException(status_code=403, detail="Admins or users only")
+    return user
