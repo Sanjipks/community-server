@@ -1,7 +1,7 @@
 from pydantic import BaseModel, EmailStr, model_validator
 from typing import Literal, Optional, List
 from bcrypt import hashpw, gensalt
-
+from enum import Enum
 from app.utilityFunctions.passwordRules import check_password
 
 class user(BaseModel):
@@ -154,14 +154,21 @@ class postJoke(BaseModel):
     author: str
     timestamp: str
 
-class chatlist(BaseModel):
+
+# for chat user list and messages
+class OnlineStatus(str, Enum):
+    online = "online"
+    away = "away"
+    busy = "busy"
+    offline = "offline"
+
+class chatListUser(BaseModel):
     userId: str
     username: str
     userEmail: str
     profilePicture: str
-    # lastMessage: Optional[str] = None
-    # lastMessageTime: Optional[str] = None
-
+    onlineStatus: OnlineStatus
+    
 class chatMessages(BaseModel):
     sender: str
     receiver: str
