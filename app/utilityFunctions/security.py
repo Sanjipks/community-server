@@ -11,6 +11,8 @@ SECRET = "SECRET"
 ALGO = "HS256"
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
+print ("Security module loaded", oauth2_scheme)  # Debug log to confirm the module is being imported
+
 
 
 def create_access_token(data: dict, expires_delta: timedelta):
@@ -42,11 +44,13 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         raise HTTPException(status_code=401, detail="Invalid token")
 
     user_id = payload.get("sub")
+    print("Token payload:", user_id)  # Debug log to check the token contents
     if not user_id:
         raise HTTPException(status_code=401, detail="Invalid token payload")
 
     db = await get_database()
     user = await db["users"].find_one({"_id": ObjectId(user_id)})
+    print("User from DB:", user)  # Debug log to check the user info
 
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
