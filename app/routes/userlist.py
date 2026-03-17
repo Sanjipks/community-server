@@ -6,11 +6,10 @@ from app.utilityFunctions.security import require_admin, require_user
 
 router = APIRouter()
 
-@router.get("/list")
-async def get_users(currentUser = Depends(require_user)):
+@router.get("/list" )
+async def get_users(dependencies=Depends(require_user)):
     db = await get_database()
-
-    print("Current user:", currentUser)  # Debug log to check the user info
+    print("Current user: ", dependencies)  # Debug log to check the user info
     users = await db["users"].find().to_list(length=100)
     for user in users:
         user["id"] = str(user["_id"])
