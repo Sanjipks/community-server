@@ -55,7 +55,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    return user
+    return user 
 
 
 async def require_admin(user = Depends(get_current_user)):
@@ -64,6 +64,7 @@ async def require_admin(user = Depends(get_current_user)):
     return user
 
 async def require_user(user = Depends(get_current_user)):
+    print("Checking user role:", user.get("role"))  # Debug log to check the user role
     if user.get("role") != "user":
         raise HTTPException(status_code=403, detail="Users only")
     return user
