@@ -1,7 +1,7 @@
 from app.database import get_database
 from fastapi import APIRouter, Depends
 
-from app.utilityFunctions.security import require_admin, require_user
+from app.utilityFunctions.security import require_admin, require_user, require_current_user_or_admin
 
 
 router = APIRouter()
@@ -17,7 +17,7 @@ async def get_users(dependencies=Depends(require_user)):
     return [{"id": user["id"], "email": user["email"], "username": user["firstName"] + " " + user["lastName"]}  for user in users]
 
 @router.delete("/delete-user")
-async def delete_user(useremail: str):
+async def delete_user(useremail: str, dependencies=Depends(require_admin)):
     db = await get_database()
     result = await db["users"].delete_one({"email": useremail})
     if result.deleted_count == 1:
@@ -26,7 +26,7 @@ async def delete_user(useremail: str):
         return {"message": "User not found"}     
     
 @router.post("/delete-multiple-users")
-async def bulk_delete_users(useremails: list[str]):
+async def bulk_delete_users(useremails: list[str], dependencies=Depends(require_current_user_or_admin)):
     db = await get_database()
     result = await db["users"].delete_many({"email": {"$in": useremails}})
     if result.deleted_count > 0:
