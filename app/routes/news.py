@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from fastapi import APIRouter, UploadFile, HTTPException, Form, File, Depends
-from app.utilityFunctions.security import get_current_user
+from app.utilityFunctions.security import get_current_user, require_current_user_or_admin
 from pathlib import Path
 from app.database import get_database
 from app.models import BulkDeleteBody
@@ -31,12 +31,12 @@ async def get_communitynews():
     return items
 
 
-@router.post("/addnews")
+@router.post("/addnews" )
 async def add_news(
     title: str = Form(...),
     description: str = Form(...),
     author: str = Form(...),
-    image: UploadFile = File(...),
+    image: UploadFile = File(...), dependencies=Depends(require_current_user_or_admin)
 ):
     db = await get_database()
 
@@ -89,8 +89,10 @@ async def add_news(
 @router.delete("/allnews/{id}")
 async def delete_news(
     id: str,
-    current_user = Depends(get_current_user),
+    current_user = Depends(require_current_user_or_admin),
+    
 ):
+    print ('news delete endpoint called with id:', current_user)  # Debug log to check the incoming ID
     db = await get_database()
 
     try:
@@ -103,6 +105,7 @@ async def delete_news(
         raise HTTPException(status_code=404, detail="News not found")
 
     # Example: news["authorId"] stores user _id as string
+    
     is_admin = current_user.get("role") == "admin"
     is_owner = str(current_user["_id"]) == str(news.get("authorId"))
 
@@ -117,7 +120,7 @@ async def delete_news(
 
 
 @router.post("/allnews/delete-multiple-news")
-async def bulk_delete_news(body: BulkDeleteBody):
+async def bulk_delete_news(body: BulkDeleteBody, required_user = Depends(require_current_user_or_admin)):
     db = await get_database()
     object_ids = []
     for _id in body.ids:
