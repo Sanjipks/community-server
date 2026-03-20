@@ -1,7 +1,8 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from bson import ObjectId
 from app.database import get_database
 from app.models import postCommunityPost
+from app.utilityFunctions.security import require_current_user_or_admin
 
 router = APIRouter()
 
@@ -23,7 +24,7 @@ async def get_community_posts(start: int, end: int):
         raise HTTPException(status_code=500, detail=f"Error fetching posts: {str(e)}")
 
 @router.post("/post-community-post")
-async def post_community_post(post: postCommunityPost):
+async def post_community_post(post: postCommunityPost, dependencies=Depends(require_current_user_or_admin)):
     try:
         db = await get_database()
         post_dict = post.model_dump()
@@ -37,7 +38,7 @@ async def post_community_post(post: postCommunityPost):
     
 
 @router.delete("/delete-community-post")
-async def delete_posted_category(request: postCommunityPost):
+async def delete_posted_category(request: postCommunityPost, dependencies=Depends(require_current_user_or_admin)):
     try:
         db = await get_database()
         object_id = ObjectId(request.id)  
