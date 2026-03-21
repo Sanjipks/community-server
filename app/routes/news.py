@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from fastapi import APIRouter, UploadFile, HTTPException, Form, File, Depends
-from app.utilityFunctions.security import get_current_user, require_current_user_or_admin
+from app.utilityFunctions.security import require_current_user_or_admin
 from pathlib import Path
 from app.database import get_database
 from app.models import BulkDeleteBody
