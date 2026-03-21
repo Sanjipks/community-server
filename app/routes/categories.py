@@ -1,8 +1,9 @@
 from datetime import datetime
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from bson import ObjectId
 from app.database import get_database
 from app.models import postCategory, postedCategory, BulkDeleteBody
+from app.utilityFunctions.security import require_current_user_or_admin
 
 router = APIRouter()
 
@@ -39,7 +40,7 @@ async def post_category(category: postCategory):
         raise HTTPException(status_code=500, detail=f"Error posting category: {str(e)}")
 
 @router.delete("/posted-categories/{id}")
-async def delete_posted_category(id: str):
+async def delete_posted_category(id: str, dependencies=Depends(require_current_user_or_admin)):
     try:
         db = await get_database()
         object_id = ObjectId(id)  # Convert the string id to ObjectId
@@ -52,7 +53,7 @@ async def delete_posted_category(id: str):
         raise HTTPException(status_code=400, detail=f"Error deleting category: {str(e)}")
     
 @router.post("/delete-multiple-categories")
-async def bulk_delete_categories(request: BulkDeleteBody):
+async def bulk_delete_categories(request: BulkDeleteBody, dependencies=Depends(require_current_user_or_admin)):
     ids = request.ids
     db = await get_database()
     object_ids = []
