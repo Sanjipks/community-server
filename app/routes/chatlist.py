@@ -1,14 +1,14 @@
 from bson import ObjectId
 from app.database import get_database
-from fastapi import APIRouter, HTTPException
-
+from fastapi import APIRouter, HTTPException, Depends
 from app.models import postCommunityPost
+from app.utilityFunctions.security import require_current_user
 
 
 router = APIRouter()
 
 @router.post("/adduser") 
-async def add_user(user: postCommunityPost):
+async def add_user(user: postCommunityPost, dependencies=Depends(require_current_user)):
     db = await get_database()
     user_dict = user.model_dump()
     result = await db["user"].insert_one(user_dict)
@@ -19,7 +19,7 @@ async def add_user(user: postCommunityPost):
 
     
 @router.get("/users")
-async def get_users_list():
+async def get_users_list( dependencies=Depends(require_current_user)):
     db = await get_database()
     users = await db["chatlist"].find().to_list(length=100)
     for user in users:
@@ -30,7 +30,7 @@ async def get_users_list():
 
 
 @router.delete("/removeuser") 
-async def remove_user(id:str):
+async def remove_user(id:str, dependencies=Depends(require_current_user)):
     db = await get_database()
     try:
         object_id = ObjectId(id)
