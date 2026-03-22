@@ -1,13 +1,15 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from app.database import get_database
 from datetime import datetime, timezone
 from app.models import postMessage
 from bson import ObjectId
 
+from app.utilityFunctions.security import require_admin, require_current_user_or_admin
+
 router = APIRouter()
 
 @router.post('/send-message')
-async def post_message(message: postMessage):
+async def post_message(message: postMessage, dependencies=Depends(require_current_user_or_admin)):
     db = await get_database()
     now = datetime.now(timezone.utc)
     message_dict = {
@@ -23,7 +25,7 @@ async def post_message(message: postMessage):
         raise HTTPException(status_code=500, detail="Failed to post message")
     
 @router.get('/messages')
-async def get_messages():
+async def get_messages(dependencies=Depends(require_admin)):
     db = await get_database()
     messages = await db["messages"].find().to_list(length=100)
     for msg in messages:
@@ -32,7 +34,7 @@ async def get_messages():
     return messages 
 
 @router.delete('/messages/{id}')
-async def delete_message(id: str):
+async def delete_message(id: str, dependencies=Depends(require_admin)):
     db = await get_database()  
     try:
         object_id = ObjectId(id)
