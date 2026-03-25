@@ -7,7 +7,7 @@ from app.utilityFunctions.security import require_current_user_or_admin
 router = APIRouter()
 
 @router.get("/community-posts/start={start}&end={end}")
-async def get_community_posts(start: int, end: int):
+async def get_community_posts(start: int, end: int, dependencies=Depends(require_current_user_or_admin)):
     try:
         db = await get_database()
         limit = end - start
