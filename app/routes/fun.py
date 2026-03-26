@@ -1,15 +1,16 @@
 from datetime import datetime
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from bson import ObjectId
 from app.database import get_database
 from app.models import postJoke
+from app.utilityFunctions.security import require_current_user_or_admin
 
 router = APIRouter()
 
 
     
 @router.post("/add-joke")
-async def post_joke(joke: postJoke):
+async def post_joke(joke: postJoke, dependencies=Depends(require_current_user_or_admin)):
     db = await get_database()
     category_dict = joke.model_dump()
     result = await db["postJoke"].insert_one(category_dict)
@@ -35,7 +36,7 @@ async def posted_jokes(start: int = 0, end: int = 100):
     return postedJokes
 
 @router.delete("/posted-jokes/{id}")
-async def delete_joke(id:str):
+async def delete_joke(id:str, dependencies=Depends(require_current_user_or_admin)):
     jokeId = id
     db = await get_database()
     try:
