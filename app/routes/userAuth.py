@@ -136,7 +136,7 @@ async def verify_authcode(body: VerifyAuthCodeBody, response: Response):
             "message": "User logged in successfully",
             "access_token": access_token,
             "token_type": "bearer",
-            "user": {"email": user.get("email"), "role": role},
+            "user": {"id": user_id, "email": user.get("email"), "role": role},
         }
 
     except HTTPException:
@@ -179,7 +179,7 @@ async def refresh(request: Request):
         "status": "success",
         "access_token": new_access_token,
         "token_type": "bearer",
-        "user": {"email": user.get("email"), "role": role},
+        "user": {"id": user.get("_id"), "email": user.get("email"), "role": role},
     }
 
 @router.post("/logout")
