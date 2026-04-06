@@ -162,16 +162,15 @@ class OnlineStatus(str, Enum):
     busy = "busy"
     offline = "offline"
 
-class chatListUser(BaseModel):
+class ChatUser(BaseModel):
     userId: str
-    username: str
-    userEmail: str
-    profilePicture: str
-    onlineStatus: OnlineStatus
+    onlineStatus: OnlineStatus 
+   
     
 class chatMessages(BaseModel):
-    sender: str
-    receiver: str
+    messageId: str
+    senderId: str
+    receiverId: str
     message: str
     timestamp: str
 
