@@ -123,8 +123,8 @@ async def verify_authcode(body: VerifyAuthCodeBody, response: Response):
         key=COOKIE_NAME,
         value=refresh_token,
         httponly=True,
-        secure=True,     # True in production (HTTPS)
-        samesite="none",   # if cross-site: "none" + secure=True
+        secure=False,     # True in production (HTTPS)
+        samesite="lax",   # if cross-site: "none" + secure=True
         max_age=60 * 60 * 24 * REFRESH_TOKEN_EXPIRE_DAYS,
         path="/",
     )
