@@ -44,14 +44,14 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         raise HTTPException(status_code=401, detail="Invalid token")
 
     user_id = payload.get("sub")
-    print("Token payload:", user_id)  # Debug log to check the token contents
+   
     if not user_id:
         raise HTTPException(status_code=401, detail="Invalid token payload")
 
     db = await get_database()
     user = await db["users"].find_one({"_id": ObjectId(user_id)})
-    print("User from DB:", user)  # Debug log to check the user info
 
+   
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
@@ -64,7 +64,7 @@ async def require_admin(user = Depends(get_current_user)):
     return user
 
 async def require_user(user = Depends(get_current_user)):
-    print("Checking user role:", user.get("role"))  # Debug log to check the user role
+   
     if user.get("role") != "user":
         raise HTTPException(status_code=403, detail="Users only")
     return user

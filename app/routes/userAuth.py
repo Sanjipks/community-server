@@ -118,15 +118,13 @@ async def verify_authcode(body: VerifyAuthCodeBody, response: Response):
         data={"sub": user_id},
         expires_delta=timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS),
     )
-        print(f"Access token created: {access_token}")  # Debug log
-        print(f"Refresh token created: {refresh_token}")  # Debug log
 
         response.set_cookie(
         key=COOKIE_NAME,
         value=refresh_token,
         httponly=True,
-        secure=False,     # True in production (HTTPS)
-        samesite="lax",   # if cross-site: "none" + secure=True
+        secure=True,     # True in production (HTTPS)
+        samesite="none",   # if cross-site: "none" + secure=True
         max_age=60 * 60 * 24 * REFRESH_TOKEN_EXPIRE_DAYS,
         path="/",
     )
@@ -149,6 +147,7 @@ async def verify_authcode(body: VerifyAuthCodeBody, response: Response):
 
 @router.post("/refresh-login")
 async def refresh(request: Request):
+    print("Refresh token request received", request)  # Debug log
     db = await get_database()
 
     refresh_token = request.cookies.get(COOKIE_NAME)
