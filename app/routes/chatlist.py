@@ -20,8 +20,9 @@ async def add_user(user: postCommunityPost, dependencies=Depends(require_user)):
     
 @router.get("/users")
 async def get_users_list( dependencies=Depends(require_user)):
+    requesting_user_id = dependencies.get("_id")
     db = await get_database()
-    users = await db["chatlist"].find().to_list(length=100)
+    users = await db["chatlist"].find({"_id": {"$ne": requesting_user_id}}).to_list(length=100)
     for user in users:
         user["id"] = str(user["_id"])
         del user["_id"]
