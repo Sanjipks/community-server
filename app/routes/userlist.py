@@ -8,9 +8,11 @@ router = APIRouter()
 
 @router.get("/list" )
 async def get_users(dependencies=Depends(require_user)):
+
+    requesting_user_id = dependencies.get("_id")
     db = await get_database()
-    print("Current user: ", dependencies)  # Debug log to check the user info
-    users = await db["users"].find().to_list(length=100)
+   
+    users = await db["users"].find({"_id": {"$ne": requesting_user_id}}).to_list(length=100)
     for user in users:
         user["id"] = str(user["_id"])
         del user["_id"]
