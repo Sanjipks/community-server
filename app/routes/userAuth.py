@@ -123,8 +123,8 @@ async def verify_authcode(body: VerifyAuthCodeBody, response: Response):
         key=COOKIE_NAME,
         value=refresh_token,
         httponly=True,
-        secure=True,     # True in production (HTTPS)
-        samesite="none",   # if cross-site: "none" + secure=True
+        secure=False,     # True in production (HTTPS)
+        samesite="lax",   # if cross-site: "none" + secure=True
         max_age=60 * 60 * 24 * REFRESH_TOKEN_EXPIRE_DAYS,
         path="/",
     )
@@ -147,15 +147,16 @@ async def verify_authcode(body: VerifyAuthCodeBody, response: Response):
 
 @router.post("/refresh-login")
 async def refresh(request: Request):
-    print("Refresh token request received", request)  # Debug log
+  
     db = await get_database()
 
     refresh_token = request.cookies.get(COOKIE_NAME)
+  
     if not refresh_token:
         raise HTTPException(status_code=401, detail="Missing refresh token")
 
     payload = verify_token(refresh_token, expected_type="refresh")
-   
+    
     if not payload:
         raise HTTPException(status_code=401, detail="Invalid refresh token")
 
@@ -164,6 +165,7 @@ async def refresh(request: Request):
         raise HTTPException(status_code=401, detail="Invalid refresh token")
 
     user = await db["users"].find_one({"_id": ObjectId(user_id)})
+   
     if not user:
         raise HTTPException(status_code=401, detail="User not found")
 
@@ -173,13 +175,17 @@ async def refresh(request: Request):
         data={"sub": user_id, "role": role},
         expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
     )
-
+    
     return {
-        "status": "success",
-        "access_token": new_access_token,
-        "token_type": "bearer",
-        "user": {"id": user.get("_id"), "email": user.get("email"), "role": role},
-    }
+    "status": "success",
+    "access_token": new_access_token,
+    "token_type": "bearer",
+    "user": {
+        "id": str(user.get("_id")),  
+        "email": user.get("email"),
+        "role": role,
+    },
+}
 
 @router.post("/logout")
 async def logout(response: Response):
